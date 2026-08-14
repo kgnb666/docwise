@@ -1,0 +1,424 @@
+{
+  "items": [
+    {
+      "question": "什么是RAG？",
+      "expected": "rag-notes.md",
+      "hit": true,
+      "top_docs": [
+        "rag-notes.md",
+        "README.md",
+        "git-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "RAG（Retrieval-Augmented Generation，检索增强生成）是一种把「检索」和「生成」结合起来的架构。它的核心思想是：在让大语言模型生成回答之前，先从外部知识库中检索出与问题相关的资料片段，把这些片段作为上下文一起交"
+    },
+    {
+      "question": "RAG 的典型流程包含哪些环节",
+      "expected": "rag-notes.md",
+      "hit": true,
+      "top_docs": [
+        "rag-notes.md",
+        "git-notes.md",
+        "README.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据资料 [1]，一个标准的 RAG 流程包含五个环节：\n\n1. **文档解析**：读取 PDF、Word、Markdown 等格式的原始文档，提取纯文本；\n2. **文本分块**：把长文本切分成语义完整的小块（chunk），方便后续检索；"
+    },
+    {
+      "question": "为什么需要混合检索？纯向量检索有什么缺点",
+      "expected": "rag-notes.md",
+      "hit": true,
+      "top_docs": [
+        "rag-notes.md",
+        "llm-notes.md",
+        "db-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料，需要混合检索的原因及纯向量检索的缺点如下：\n\n**纯向量检索的缺点**：\n纯向量检索（语义检索）擅长处理\"意思相近但用词不同\"的查询，但遇到精确匹配的场景（如型号、代码、人名、专有名词）时容易失手 [1]。\n\n**为什么需要混"
+    },
+    {
+      "question": "怎么评估一个问答系统答得忠不忠实",
+      "expected": "rag-notes.md",
+      "hit": true,
+      "top_docs": [
+        "rag-notes.md",
+        "README.md",
+        "README.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.8,
+      "answer_preview": "根据参考资料，评估问答系统回答的忠实度，主要看**模型回答是否严格基于检索到的资料，有没有编造** [1]。\n\n具体来说，在评测 RAG 系统时，忠实度是常用指标之一，它与命中率/召回率、答案相关性共同构成评测体系 [1]。实践中需要自建测"
+    },
+    {
+      "question": "Dockerfile 中 CMD 指令的作用是什么",
+      "expected": "docker-notes.md",
+      "hit": true,
+      "top_docs": [
+        "docker-notes.md",
+        "ml-notes.md",
+        "os-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料，Dockerfile 中的 `CMD` 指令用于**指定容器启动时执行的默认命令**[1]。"
+    },
+    {
+      "question": "docker compose 有什么用处",
+      "expected": "docker-notes.md",
+      "hit": true,
+      "top_docs": [
+        "docker-notes.md",
+        "README.md",
+        "git-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料，docker compose 的用处是：\n\n用一份 YAML 文件（docker-compose.yml）定义多个服务，一条命令 `docker compose up --build` 就能把整个应用栈（后端、前端、数据库）一"
+    },
+    {
+      "question": "容器和虚拟机相比有什么优势",
+      "expected": "docker-notes.md",
+      "hit": true,
+      "top_docs": [
+        "docker-notes.md",
+        "llm-notes.md",
+        "git-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.9,
+      "answer_preview": "根据资料 [1]，Docker 容器与虚拟机相比，**更轻量、启动更快**，因为容器之间相互隔离，但又共享宿主机的操作系统内核 [1]。"
+    },
+    {
+      "question": "把一个服务跑上线的步骤有哪些",
+      "expected": "docker-notes.md",
+      "hit": true,
+      "top_docs": [
+        "docker-notes.md",
+        "README.md",
+        "git-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.9,
+      "answer_preview": "根据参考资料，部署上线的基本流程如下 [1]：\n\n1. **写 Dockerfile**：把每个服务镜像化。\n2. **用 docker compose 编排**：通过 `docker-compose.yml` 定义并编排所有服务。\n3. "
+    },
+    {
+      "question": "git merge 和 rebase 有什么区别",
+      "expected": "git-notes.md",
+      "hit": true,
+      "top_docs": [
+        "git-notes.md",
+        "git-notes.md",
+        "rag-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料，`git merge` 和 `git rebase` 的区别如下：\n\n- **merge**：保留完整的提交历史，会生成一个\"合并提交\"，适合记录真实开发过程。[1]\n- **rebase**：把当前分支的提交\"重新铺\"到目标"
+    },
+    {
+      "question": "已经推送到远程的提交怎么撤销，该用哪个命令",
+      "expected": "git-notes.md",
+      "hit": true,
+      "top_docs": [
+        "git-notes.md",
+        "db-notes.md",
+        "git-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.9,
+      "answer_preview": "根据资料，撤销已推送到远程的提交应使用 `git revert <commit>` 命令。资料明确指出：\n\n> `git revert <commit>`：生成一个反向提交来撤销指定提交（适合公共分支）[1]\n\n**原因**：对于已推送的公"
+    },
+    {
+      "question": "GitHub Actions 是什么，怎么触发工作流",
+      "expected": "git-notes.md",
+      "hit": true,
+      "top_docs": [
+        "git-notes.md",
+        "git-notes.md",
+        "os-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.95,
+      "answer_preview": "根据参考资料，GitHub Actions 是 GitHub 内置的 CI/CD 工具。你可以在 `.github/workflows/` 目录下编写 YAML 文件来定义工作流，每次 push 或 PR 时自动执行（如跑测试、构建、部署）"
+    },
+    {
+      "question": "提交信息为什么要带类型前缀，feat 和 fix 是什么意思",
+      "expected": "git-notes.md",
+      "hit": true,
+      "top_docs": [
+        "git-notes.md",
+        "git-notes.md",
+        "rag-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.95,
+      "answer_preview": "根据参考资料，提交信息推荐使用 **Conventional Commits** 规范，带类型前缀是为了让历史可读、可自动生成 changelog [1]。\n\n其中：\n- **feat**：表示新功能 [1]\n- **fix**：表示修复 "
+    },
+    {
+      "question": "监督学习和无监督学习的区别",
+      "expected": "ml-notes.md",
+      "hit": true,
+      "top_docs": [
+        "ml-notes.md",
+        "deep-learning-notes.md",
+        "os-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料 [1]，监督学习和无监督学习的区别主要体现在**训练数据是否有标签**以及**学习目标**上：\n\n- **监督学习**：训练数据带标签（如\"这张图是猫\"），学习的是**输入到输出的映射**。典型任务包括分类（如垃圾邮件识别）和"
+    },
+    {
+      "question": "模型在训练集表现好但测试集差，是什么问题怎么解决",
+      "expected": "ml-notes.md",
+      "hit": true,
+      "top_docs": [
+        "ml-notes.md",
+        "llm-notes.md",
+        "rag-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据资料，模型在训练集表现好但测试集差，是典型的**过拟合**问题 [1]。\n\n**解决方法** [1]：\n- **交叉验证**：评估模型的泛化能力。\n- **正则化**：惩罚过大的参数。\n- **早停**：在验证集表现变差时停止训练。\n-"
+    },
+    {
+      "question": "分类问题在类别不平衡时该用什么指标",
+      "expected": "ml-notes.md",
+      "hit": true,
+      "top_docs": [
+        "ml-notes.md",
+        "rag-notes.md",
+        "db-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.9,
+      "answer_preview": "根据资料 [1]，在类别不平衡时，准确率会\"骗人\"，因此应该使用**精确率、召回率**或 **PR 曲线**来评估分类问题 [1]。\n\n具体来说，资料提到：\n> 注意类别不平衡时准确率会骗人，要用精确率/召回率或 PR 曲线 [1]。"
+    },
+    {
+      "question": "反向传播是怎么工作的",
+      "expected": "deep-learning-notes.md",
+      "hit": true,
+      "top_docs": [
+        "deep-learning-notes.md",
+        "git-notes.md",
+        "git-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.9,
+      "answer_preview": "根据参考资料，反向传播是神经网络训练中的关键步骤，其工作原理如下：\n\n- **核心机制**：反向传播利用**链式法则**来求梯度，即从输出层开始，逐层向前计算损失函数对每个权重的梯度 [1]。\n- **配合使用**：计算出梯度后，再使用**"
+    },
+    {
+      "question": "Transformer 为什么是大模型的基石",
+      "expected": "deep-learning-notes.md",
+      "hit": true,
+      "top_docs": [
+        "deep-learning-notes.md",
+        "llm-notes.md",
+        "rag-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.9,
+      "answer_preview": "根据参考资料，Transformer 之所以是大模型的基石，是因为它**用自注意力机制并行处理序列**，这是其核心优势 [1]。\n\n具体来说，相比 RNN 按时间步顺序处理序列（存在长依赖问题），Transformer 的自注意力机制能够并"
+    },
+    {
+      "question": "Adam 优化器和学习率调度分别解决什么问题",
+      "expected": "deep-learning-notes.md",
+      "hit": true,
+      "top_docs": [
+        "deep-learning-notes.md",
+        "ml-notes.md",
+        "rag-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.9,
+      "answer_preview": "根据参考资料，Adam 优化器和学习率调度解决的问题如下：\n\n- **Adam 优化器**：是训练神经网络时的默认优化器选择，用于更新权重，帮助模型收敛 [1]。\n- **学习率调度**：用于解决学习率设置的问题——学习率太大会导致不收敛，"
+    },
+    {
+      "question": "Python 里装饰器是干什么的，一般用在哪些场景",
+      "expected": "python-notes.md",
+      "hit": true,
+      "top_docs": [
+        "python-notes.md",
+        "db-notes.md",
+        "docker-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.95,
+      "answer_preview": "根据资料 [1]，装饰器本质是\"接收函数返回函数\"的语法糖，常用于日志、鉴权、缓存。例如 `@lru_cache` 就是标准库自带的一个装饰器，给纯函数加记忆化缓存。\n\n简单来说，装饰器可以在不修改原函数代码的情况下，为函数增加额外的功能。"
+    },
+    {
+      "question": "生成器适合什么场景，和 async 并发有什么区别",
+      "expected": "python-notes.md",
+      "hit": true,
+      "top_docs": [
+        "python-notes.md",
+        "git-notes.md",
+        "docker-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.95,
+      "answer_preview": "根据参考资料 [1]，生成器（yield）采用惰性求值，适合**流式处理大文件**等场景。而 async/await 则用于 **IO 密集任务**（如网络请求、数据库），配合 asyncio 实现单线程并发。\n\n两者的核心区别在于：\n- "
+    },
+    {
+      "question": "Python 3.7 之后字典有什么特性",
+      "expected": "python-notes.md",
+      "hit": true,
+      "top_docs": [
+        "python-notes.md",
+        "README.md",
+        "db-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.9,
+      "answer_preview": "根据参考资料 [1]，Python 3.7+ 的字典（dict）是**保序的**，即会保持键值对的插入顺序。\n\n引用来源：[1]"
+    },
+    {
+      "question": "数据库事务的 ACID 分别指什么",
+      "expected": "db-notes.md",
+      "hit": true,
+      "top_docs": [
+        "db-notes.md",
+        "README.md",
+        "git-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料，事务的 ACID 指的是以下四个特性 [1]：\n\n- **原子性（Atomicity）**：事务是一组操作，要么全部成功，要么全部回滚。\n- **一致性（Consistency）**：事务执行前后，数据库保持一致状态。\n- *"
+    },
+    {
+      "question": "MySQL 为什么用 B+ 树做索引而不是哈希表",
+      "expected": "db-notes.md",
+      "hit": true,
+      "top_docs": [
+        "db-notes.md",
+        "python-notes.md",
+        "rag-notes.md"
+      ],
+      "faithfulness": 0.6,
+      "relevance": 0.9,
+      "answer_preview": "根据参考资料，MySQL InnoDB 使用 B+ 树做索引，主要原因是：\n\n- **适合磁盘 IO**：B+ 树内部节点只存键、叶子节点存数据，扇出高、树矮，能减少磁盘 IO 次数 [1]。\n- **支持范围查询**：B+ 树叶子节点有序"
+    },
+    {
+      "question": "一条 SQL 很慢，你会怎么排查优化",
+      "expected": "db-notes.md",
+      "hit": true,
+      "top_docs": [
+        "db-notes.md",
+        "rag-notes.md",
+        "deep-learning-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.95,
+      "answer_preview": "根据参考资料，排查和优化慢 SQL 可以按以下步骤进行：\n\n1. **使用 EXPLAIN 查看执行计划**：检查 `type` 是否为 `index` 或 `range`，确认是否走了索引，以及是否有全表扫描的迹象。[1]\n\n2. **检"
+    },
+    {
+      "question": "TCP 三次握手是为了解决什么问题",
+      "expected": "network-notes.md",
+      "hit": true,
+      "top_docs": [
+        "network-notes.md",
+        "rag-notes.md",
+        "git-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "TCP 三次握手（SYN → SYN+ACK → ACK）的目的是**双方确认彼此的收发能力**，确保连接建立可靠 [1]。\n\n具体来说，通过三次握手，客户端和服务端可以互相确认：\n- 自己的发送能力正常\n- 对方的接收能力正常\n- 对方的"
+    },
+    {
+      "question": "HTTPS 是怎么做到防冒充和防窃听的",
+      "expected": "network-notes.md",
+      "hit": true,
+      "top_docs": [
+        "network-notes.md",
+        "git-notes.md",
+        "docker-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料，HTTPS 在 TCP 之上加了一层 TLS，通过以下两步实现防冒充和防窃听：\n\n1. **防冒充（证书校验）**：通过证书校验来确认服务器身份，防止被冒充 [1]。\n2. **防窃听（加密传输）**：通过密钥协商（如 ECD"
+    },
+    {
+      "question": "429 状态码代表什么",
+      "expected": "network-notes.md",
+      "hit": true,
+      "top_docs": [
+        "network-notes.md",
+        "README.md",
+        "git-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料，429 状态码代表**限流**（客户端请求过于频繁，被服务器限制）[1]。"
+    },
+    {
+      "question": "死锁产生的四个必要条件是什么",
+      "expected": "os-notes.md",
+      "hit": true,
+      "top_docs": [
+        "os-notes.md",
+        "docker-notes.md",
+        "README.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料，死锁产生的四个必要条件是 [1]：\n\n1. **互斥**：资源不能被多个进程同时共享使用。\n2. **持有并等待**：进程持有至少一个资源，同时等待获取其他被占用的资源。\n3. **不可剥夺**：已分配给进程的资源不能被强制剥"
+    },
+    {
+      "question": "进程和线程分别是什么，切换开销为什么不同",
+      "expected": "os-notes.md",
+      "hit": true,
+      "top_docs": [
+        "os-notes.md",
+        "git-notes.md",
+        "rag-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.95,
+      "answer_preview": "根据资料 [1]：\n\n- **进程**是资源分配的最小单位，拥有独立的地址空间。\n- **线程**是 CPU 调度的最小单位，共享进程的资源。\n\n**切换开销不同的原因**：线程切换比进程切换轻量，因为线程共享进程的资源（如地址空间），而进"
+    },
+    {
+      "question": "大模型为什么会一本正经地胡说八道，怎么缓解",
+      "expected": "llm-notes.md",
+      "hit": true,
+      "top_docs": [
+        "llm-notes.md",
+        "rag-notes.md",
+        "ml-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "大模型“一本正经地胡说八道”（即幻觉）的原因和缓解方法如下：\n\n**原因**：大模型是概率生成模型，不是查数据库，因此可能生成看似合理但实际错误的内容 [1]。\n\n**缓解方法** [1]：\n- **检索增强（RAG）**：提供事实依据，让"
+    },
+    {
+      "question": "LoRA 微调相比全参微调有什么优势",
+      "expected": "llm-notes.md",
+      "hit": true,
+      "top_docs": [
+        "llm-notes.md",
+        "rag-notes.md",
+        "ml-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.95,
+      "answer_preview": "根据参考资料[1]，LoRA（参数高效微调）相比全参微调的优势是：**只训练少量低秩矩阵，省显存、效果好，是主流做法**。\n\n具体来说：\n- **省显存**：LoRA 只训练少量低秩矩阵，而不是更新全部模型参数，因此显存占用更少。\n- **"
+    },
+    {
+      "question": "Function Calling 是怎么让模型调用工具的",
+      "expected": "llm-notes.md",
+      "hit": true,
+      "top_docs": [
+        "llm-notes.md",
+        "rag-notes.md",
+        "ml-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料，Function Calling 的工作机制如下：\n\n1. **声明工具**：给模型声明可用的工具，包括工具的名称、描述和参数 Schema（即参数的结构化定义）[1]。\n2. **模型请求调用**：模型根据用户的问题，按需请"
+    }
+  ],
+  "recall": 1.0,
+  "avg_faithfulness": 0.9875,
+  "avg_relevance": 0.9547,
+  "count": 32
+}

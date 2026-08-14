@@ -1,0 +1,15 @@
+# 依赖清单（MVP 阶段刻意保持精简，全部支持 Python 3.11+）
+# 向量化阶段会追加：numpy / faiss-cpu（或 pgvector 驱动）、rerankers、ragas 等
+
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2.7
+pydantic-settings>=2.2
+httpx>=0.27
+python-multipart>=0.0.9
+pypdf>=4.0
+jieba>=0.42
+
+# 测试与代码质量
+pytest>=8.0
+ruff>=0.8

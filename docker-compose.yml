@@ -1,0 +1,25 @@
+# DocWise 一键部署（生产模式）
+# 用法：docker compose up --build -d    然后访问 http://服务器IP
+# 架构：前端 nginx(80) → /api 反代 → 后端 FastAPI(8000, 仅内网)
+# 本地开发不用 Docker，直接 npm run dev + uvicorn
+
+services:
+  backend:
+    build: ./backend
+    container_name: docwise-backend
+    expose:
+      - "8000"          # 只暴露给 compose 内网，不映射到宿主机
+    env_file:
+      - ./backend/.env  # 部署前先复制 .env.example 并填 Key
+    volumes:
+      - ./backend/data:/app/data   # 持久化向量数据（后续换数据库后调整）
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: docwise-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

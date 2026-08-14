@@ -1,0 +1,33 @@
+{
+  "corpus_chunks": 13,
+  "embed_single_query_ms": 293.4,
+  "chat_avg_latency_ms": 1884.6,
+  "chat_avg_cost_yuan": 0.003743,
+  "items": [
+    {
+      "question": "什么是RAG？",
+      "latency_ms": 1823.5,
+      "answer_chars": 150,
+      "est_input_tokens": 1494,
+      "est_output_tokens": 100,
+      "est_cost_yuan": 0.00379
+    },
+    {
+      "question": "git rebase 和 merge 有什么区别",
+      "latency_ms": 1663.5,
+      "answer_chars": 202,
+      "est_input_tokens": 1228,
+      "est_output_tokens": 134,
+      "est_cost_yuan": 0.00353
+    },
+    {
+      "question": "MySQL 为什么用 B+ 树做索引",
+      "latency_ms": 2166.7,
+      "answer_chars": 246,
+      "est_input_tokens": 1297,
+      "est_output_tokens": 164,
+      "est_cost_yuan": 0.00391
+    }
+  ],
+  "pricing_note": "价格估算口径：输入 ¥2.0/M token、输出 ¥8.0/M、嵌入 ¥0.8/M（以官网实时价为准）；token 数按字符数/1.5 粗估。"
+}

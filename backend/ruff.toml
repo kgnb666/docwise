@@ -1,0 +1,14 @@
+# Ruff 静态检查配置
+# 运行：ruff check app tests scripts
+
+line-length = 110
+target-version = "py312"
+
+[lint]
+# B008: FastAPI 依赖注入惯用法 `x = Depends(...)` 会误报 function-call-in-default-argument，
+#       本项目统一使用该写法（对初学者更直观），故豁免。
+ignore = ["B008"]
+
+[lint.per-file-ignores]
+# 测试里允许直接访问私有成员做隔离/断言
+"tests/*" = ["SLF001"]

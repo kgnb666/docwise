@@ -1,0 +1,1068 @@
+{
+  "embedding": "openai",
+  "tokenizer": "jieba",
+  "reranker_api": true,
+  "test_set": "C:\\Users\\kgnb666.DESKTOP-55DCFH3.003\\Desktop\\dp\\backend\\tests\\data\\test_set.json",
+  "corpus_chunks": 40,
+  "chunk_size": 200,
+  "top_k": 1,
+  "modes": [
+    {
+      "name": "纯向量检索",
+      "hits": 31,
+      "total": 32,
+      "accuracy": 0.9688,
+      "details": [
+        {
+          "question": "什么是RAG？",
+          "expected": "rag-notes.md",
+          "top3": [
+            "rag-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "RAG 的典型流程包含哪些环节",
+          "expected": "rag-notes.md",
+          "top3": [
+            "rag-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "为什么需要混合检索？纯向量检索有什么缺点",
+          "expected": "rag-notes.md",
+          "top3": [
+            "rag-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "怎么评估一个问答系统答得忠不忠实",
+          "expected": "rag-notes.md",
+          "top3": [
+            "rag-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Dockerfile 中 CMD 指令的作用是什么",
+          "expected": "docker-notes.md",
+          "top3": [
+            "docker-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "docker compose 有什么用处",
+          "expected": "docker-notes.md",
+          "top3": [
+            "docker-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "容器和虚拟机相比有什么优势",
+          "expected": "docker-notes.md",
+          "top3": [
+            "docker-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "把一个服务跑上线的步骤有哪些",
+          "expected": "docker-notes.md",
+          "top3": [
+            "docker-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "git merge 和 rebase 有什么区别",
+          "expected": "git-notes.md",
+          "top3": [
+            "git-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "已经推送到远程的提交怎么撤销，该用哪个命令",
+          "expected": "git-notes.md",
+          "top3": [
+            "git-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "GitHub Actions 是什么，怎么触发工作流",
+          "expected": "git-notes.md",
+          "top3": [
+            "git-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "提交信息为什么要带类型前缀，feat 和 fix 是什么意思",
+          "expected": "git-notes.md",
+          "top3": [
+            "git-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "监督学习和无监督学习的区别",
+          "expected": "ml-notes.md",
+          "top3": [
+            "ml-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "模型在训练集表现好但测试集差，是什么问题怎么解决",
+          "expected": "ml-notes.md",
+          "top3": [
+            "ml-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "分类问题在类别不平衡时该用什么指标",
+          "expected": "ml-notes.md",
+          "top3": [
+            "ml-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "反向传播是怎么工作的",
+          "expected": "deep-learning-notes.md",
+          "top3": [
+            "deep-learning-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Transformer 为什么是大模型的基石",
+          "expected": "deep-learning-notes.md",
+          "top3": [
+            "llm-notes.md"
+          ],
+          "hit": false
+        },
+        {
+          "question": "Adam 优化器和学习率调度分别解决什么问题",
+          "expected": "deep-learning-notes.md",
+          "top3": [
+            "deep-learning-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Python 里装饰器是干什么的，一般用在哪些场景",
+          "expected": "python-notes.md",
+          "top3": [
+            "python-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "生成器适合什么场景，和 async 并发有什么区别",
+          "expected": "python-notes.md",
+          "top3": [
+            "python-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Python 3.7 之后字典有什么特性",
+          "expected": "python-notes.md",
+          "top3": [
+            "python-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "数据库事务的 ACID 分别指什么",
+          "expected": "db-notes.md",
+          "top3": [
+            "db-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "MySQL 为什么用 B+ 树做索引而不是哈希表",
+          "expected": "db-notes.md",
+          "top3": [
+            "db-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "一条 SQL 很慢，你会怎么排查优化",
+          "expected": "db-notes.md",
+          "top3": [
+            "db-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "TCP 三次握手是为了解决什么问题",
+          "expected": "network-notes.md",
+          "top3": [
+            "network-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "HTTPS 是怎么做到防冒充和防窃听的",
+          "expected": "network-notes.md",
+          "top3": [
+            "network-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "429 状态码代表什么",
+          "expected": "network-notes.md",
+          "top3": [
+            "network-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "死锁产生的四个必要条件是什么",
+          "expected": "os-notes.md",
+          "top3": [
+            "os-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "进程和线程分别是什么，切换开销为什么不同",
+          "expected": "os-notes.md",
+          "top3": [
+            "os-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "大模型为什么会一本正经地胡说八道，怎么缓解",
+          "expected": "llm-notes.md",
+          "top3": [
+            "llm-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "LoRA 微调相比全参微调有什么优势",
+          "expected": "llm-notes.md",
+          "top3": [
+            "llm-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Function Calling 是怎么让模型调用工具的",
+          "expected": "llm-notes.md",
+          "top3": [
+            "llm-notes.md"
+          ],
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "混合检索",
+      "hits": 32,
+      "total": 32,
+      "accuracy": 1.0,
+      "details": [
+        {
+          "question": "什么是RAG？",
+          "expected": "rag-notes.md",
+          "top3": [
+            "rag-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "RAG 的典型流程包含哪些环节",
+          "expected": "rag-notes.md",
+          "top3": [
+            "rag-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "为什么需要混合检索？纯向量检索有什么缺点",
+          "expected": "rag-notes.md",
+          "top3": [
+            "rag-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "怎么评估一个问答系统答得忠不忠实",
+          "expected": "rag-notes.md",
+          "top3": [
+            "rag-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Dockerfile 中 CMD 指令的作用是什么",
+          "expected": "docker-notes.md",
+          "top3": [
+            "docker-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "docker compose 有什么用处",
+          "expected": "docker-notes.md",
+          "top3": [
+            "docker-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "容器和虚拟机相比有什么优势",
+          "expected": "docker-notes.md",
+          "top3": [
+            "docker-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "把一个服务跑上线的步骤有哪些",
+          "expected": "docker-notes.md",
+          "top3": [
+            "docker-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "git merge 和 rebase 有什么区别",
+          "expected": "git-notes.md",
+          "top3": [
+            "git-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "已经推送到远程的提交怎么撤销，该用哪个命令",
+          "expected": "git-notes.md",
+          "top3": [
+            "git-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "GitHub Actions 是什么，怎么触发工作流",
+          "expected": "git-notes.md",
+          "top3": [
+            "git-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "提交信息为什么要带类型前缀，feat 和 fix 是什么意思",
+          "expected": "git-notes.md",
+          "top3": [
+            "git-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "监督学习和无监督学习的区别",
+          "expected": "ml-notes.md",
+          "top3": [
+            "ml-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "模型在训练集表现好但测试集差，是什么问题怎么解决",
+          "expected": "ml-notes.md",
+          "top3": [
+            "ml-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "分类问题在类别不平衡时该用什么指标",
+          "expected": "ml-notes.md",
+          "top3": [
+            "ml-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "反向传播是怎么工作的",
+          "expected": "deep-learning-notes.md",
+          "top3": [
+            "deep-learning-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Transformer 为什么是大模型的基石",
+          "expected": "deep-learning-notes.md",
+          "top3": [
+            "deep-learning-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Adam 优化器和学习率调度分别解决什么问题",
+          "expected": "deep-learning-notes.md",
+          "top3": [
+            "deep-learning-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Python 里装饰器是干什么的，一般用在哪些场景",
+          "expected": "python-notes.md",
+          "top3": [
+            "python-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "生成器适合什么场景，和 async 并发有什么区别",
+          "expected": "python-notes.md",
+          "top3": [
+            "python-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Python 3.7 之后字典有什么特性",
+          "expected": "python-notes.md",
+          "top3": [
+            "python-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "数据库事务的 ACID 分别指什么",
+          "expected": "db-notes.md",
+          "top3": [
+            "db-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "MySQL 为什么用 B+ 树做索引而不是哈希表",
+          "expected": "db-notes.md",
+          "top3": [
+            "db-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "一条 SQL 很慢，你会怎么排查优化",
+          "expected": "db-notes.md",
+          "top3": [
+            "db-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "TCP 三次握手是为了解决什么问题",
+          "expected": "network-notes.md",
+          "top3": [
+            "network-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "HTTPS 是怎么做到防冒充和防窃听的",
+          "expected": "network-notes.md",
+          "top3": [
+            "network-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "429 状态码代表什么",
+          "expected": "network-notes.md",
+          "top3": [
+            "network-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "死锁产生的四个必要条件是什么",
+          "expected": "os-notes.md",
+          "top3": [
+            "os-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "进程和线程分别是什么，切换开销为什么不同",
+          "expected": "os-notes.md",
+          "top3": [
+            "os-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "大模型为什么会一本正经地胡说八道，怎么缓解",
+          "expected": "llm-notes.md",
+          "top3": [
+            "llm-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "LoRA 微调相比全参微调有什么优势",
+          "expected": "llm-notes.md",
+          "top3": [
+            "llm-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Function Calling 是怎么让模型调用工具的",
+          "expected": "llm-notes.md",
+          "top3": [
+            "llm-notes.md"
+          ],
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "混合+OverlapRerank",
+      "hits": 32,
+      "total": 32,
+      "accuracy": 1.0,
+      "details": [
+        {
+          "question": "什么是RAG？",
+          "expected": "rag-notes.md",
+          "top3": [
+            "rag-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "RAG 的典型流程包含哪些环节",
+          "expected": "rag-notes.md",
+          "top3": [
+            "rag-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "为什么需要混合检索？纯向量检索有什么缺点",
+          "expected": "rag-notes.md",
+          "top3": [
+            "rag-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "怎么评估一个问答系统答得忠不忠实",
+          "expected": "rag-notes.md",
+          "top3": [
+            "rag-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Dockerfile 中 CMD 指令的作用是什么",
+          "expected": "docker-notes.md",
+          "top3": [
+            "docker-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "docker compose 有什么用处",
+          "expected": "docker-notes.md",
+          "top3": [
+            "docker-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "容器和虚拟机相比有什么优势",
+          "expected": "docker-notes.md",
+          "top3": [
+            "docker-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "把一个服务跑上线的步骤有哪些",
+          "expected": "docker-notes.md",
+          "top3": [
+            "docker-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "git merge 和 rebase 有什么区别",
+          "expected": "git-notes.md",
+          "top3": [
+            "git-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "已经推送到远程的提交怎么撤销，该用哪个命令",
+          "expected": "git-notes.md",
+          "top3": [
+            "git-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "GitHub Actions 是什么，怎么触发工作流",
+          "expected": "git-notes.md",
+          "top3": [
+            "git-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "提交信息为什么要带类型前缀，feat 和 fix 是什么意思",
+          "expected": "git-notes.md",
+          "top3": [
+            "git-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "监督学习和无监督学习的区别",
+          "expected": "ml-notes.md",
+          "top3": [
+            "ml-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "模型在训练集表现好但测试集差，是什么问题怎么解决",
+          "expected": "ml-notes.md",
+          "top3": [
+            "ml-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "分类问题在类别不平衡时该用什么指标",
+          "expected": "ml-notes.md",
+          "top3": [
+            "ml-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "反向传播是怎么工作的",
+          "expected": "deep-learning-notes.md",
+          "top3": [
+            "deep-learning-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Transformer 为什么是大模型的基石",
+          "expected": "deep-learning-notes.md",
+          "top3": [
+            "deep-learning-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Adam 优化器和学习率调度分别解决什么问题",
+          "expected": "deep-learning-notes.md",
+          "top3": [
+            "deep-learning-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Python 里装饰器是干什么的，一般用在哪些场景",
+          "expected": "python-notes.md",
+          "top3": [
+            "python-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "生成器适合什么场景，和 async 并发有什么区别",
+          "expected": "python-notes.md",
+          "top3": [
+            "python-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Python 3.7 之后字典有什么特性",
+          "expected": "python-notes.md",
+          "top3": [
+            "python-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "数据库事务的 ACID 分别指什么",
+          "expected": "db-notes.md",
+          "top3": [
+            "db-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "MySQL 为什么用 B+ 树做索引而不是哈希表",
+          "expected": "db-notes.md",
+          "top3": [
+            "db-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "一条 SQL 很慢，你会怎么排查优化",
+          "expected": "db-notes.md",
+          "top3": [
+            "db-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "TCP 三次握手是为了解决什么问题",
+          "expected": "network-notes.md",
+          "top3": [
+            "network-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "HTTPS 是怎么做到防冒充和防窃听的",
+          "expected": "network-notes.md",
+          "top3": [
+            "network-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "429 状态码代表什么",
+          "expected": "network-notes.md",
+          "top3": [
+            "network-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "死锁产生的四个必要条件是什么",
+          "expected": "os-notes.md",
+          "top3": [
+            "os-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "进程和线程分别是什么，切换开销为什么不同",
+          "expected": "os-notes.md",
+          "top3": [
+            "os-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "大模型为什么会一本正经地胡说八道，怎么缓解",
+          "expected": "llm-notes.md",
+          "top3": [
+            "llm-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "LoRA 微调相比全参微调有什么优势",
+          "expected": "llm-notes.md",
+          "top3": [
+            "llm-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Function Calling 是怎么让模型调用工具的",
+          "expected": "llm-notes.md",
+          "top3": [
+            "llm-notes.md"
+          ],
+          "hit": true
+        }
+      ]
+    },
+    {
+      "name": "混合+bge-reranker(API)",
+      "hits": 32,
+      "total": 32,
+      "accuracy": 1.0,
+      "details": [
+        {
+          "question": "什么是RAG？",
+          "expected": "rag-notes.md",
+          "top3": [
+            "rag-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "RAG 的典型流程包含哪些环节",
+          "expected": "rag-notes.md",
+          "top3": [
+            "rag-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "为什么需要混合检索？纯向量检索有什么缺点",
+          "expected": "rag-notes.md",
+          "top3": [
+            "rag-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "怎么评估一个问答系统答得忠不忠实",
+          "expected": "rag-notes.md",
+          "top3": [
+            "rag-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Dockerfile 中 CMD 指令的作用是什么",
+          "expected": "docker-notes.md",
+          "top3": [
+            "docker-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "docker compose 有什么用处",
+          "expected": "docker-notes.md",
+          "top3": [
+            "docker-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "容器和虚拟机相比有什么优势",
+          "expected": "docker-notes.md",
+          "top3": [
+            "docker-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "把一个服务跑上线的步骤有哪些",
+          "expected": "docker-notes.md",
+          "top3": [
+            "docker-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "git merge 和 rebase 有什么区别",
+          "expected": "git-notes.md",
+          "top3": [
+            "git-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "已经推送到远程的提交怎么撤销，该用哪个命令",
+          "expected": "git-notes.md",
+          "top3": [
+            "git-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "GitHub Actions 是什么，怎么触发工作流",
+          "expected": "git-notes.md",
+          "top3": [
+            "git-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "提交信息为什么要带类型前缀，feat 和 fix 是什么意思",
+          "expected": "git-notes.md",
+          "top3": [
+            "git-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "监督学习和无监督学习的区别",
+          "expected": "ml-notes.md",
+          "top3": [
+            "ml-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "模型在训练集表现好但测试集差，是什么问题怎么解决",
+          "expected": "ml-notes.md",
+          "top3": [
+            "ml-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "分类问题在类别不平衡时该用什么指标",
+          "expected": "ml-notes.md",
+          "top3": [
+            "ml-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "反向传播是怎么工作的",
+          "expected": "deep-learning-notes.md",
+          "top3": [
+            "deep-learning-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Transformer 为什么是大模型的基石",
+          "expected": "deep-learning-notes.md",
+          "top3": [
+            "deep-learning-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Adam 优化器和学习率调度分别解决什么问题",
+          "expected": "deep-learning-notes.md",
+          "top3": [
+            "deep-learning-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Python 里装饰器是干什么的，一般用在哪些场景",
+          "expected": "python-notes.md",
+          "top3": [
+            "python-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "生成器适合什么场景，和 async 并发有什么区别",
+          "expected": "python-notes.md",
+          "top3": [
+            "python-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Python 3.7 之后字典有什么特性",
+          "expected": "python-notes.md",
+          "top3": [
+            "python-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "数据库事务的 ACID 分别指什么",
+          "expected": "db-notes.md",
+          "top3": [
+            "db-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "MySQL 为什么用 B+ 树做索引而不是哈希表",
+          "expected": "db-notes.md",
+          "top3": [
+            "db-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "一条 SQL 很慢，你会怎么排查优化",
+          "expected": "db-notes.md",
+          "top3": [
+            "db-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "TCP 三次握手是为了解决什么问题",
+          "expected": "network-notes.md",
+          "top3": [
+            "network-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "HTTPS 是怎么做到防冒充和防窃听的",
+          "expected": "network-notes.md",
+          "top3": [
+            "network-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "429 状态码代表什么",
+          "expected": "network-notes.md",
+          "top3": [
+            "network-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "死锁产生的四个必要条件是什么",
+          "expected": "os-notes.md",
+          "top3": [
+            "os-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "进程和线程分别是什么，切换开销为什么不同",
+          "expected": "os-notes.md",
+          "top3": [
+            "os-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "大模型为什么会一本正经地胡说八道，怎么缓解",
+          "expected": "llm-notes.md",
+          "top3": [
+            "llm-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "LoRA 微调相比全参微调有什么优势",
+          "expected": "llm-notes.md",
+          "top3": [
+            "llm-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Function Calling 是怎么让模型调用工具的",
+          "expected": "llm-notes.md",
+          "top3": [
+            "llm-notes.md"
+          ],
+          "hit": true
+        }
+      ]
+    }
+  ],
+  "note": "命中率 = 期望来源文档出现在 top-k 检索结果中的比例。说明：离线哈希嵌入下向量与关键词信号高度重合，各模式分数接近属正常现象；真实 embedding 与 bge-reranker 下对比更有区分度。"
+}
