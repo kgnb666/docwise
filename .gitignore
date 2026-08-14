@@ -21,7 +21,7 @@ npm-debug.log*
 # 数据文件
 *.db
 *.sqlite3
-data/
+/backend/data/      # 运行时数据（上传/向量持久化）；注意不能写 data/（会误伤 tests/data 测试集）
 uploads/
 *.log
 .tmp/
