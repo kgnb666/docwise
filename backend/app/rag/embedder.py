@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import httpx
 
+from app.core.retry import with_retry
+
 
 class Embedder:
     def __init__(self, base_url: str, api_key: str, model: str):
@@ -17,21 +19,23 @@ class Embedder:
         self.model = model
 
     async def embed(self, texts: list[str]) -> list[list[float]]:
-        """批量向量化。返回顺序与输入一致。"""
+        """批量向量化。返回顺序与输入一致。网络抖动/限流自动重试。"""
         if not texts:
             return []
         if not self.api_key:
             raise RuntimeError("未配置 OPENAI_API_KEY，请先在 backend/.env 中填写")
 
-        async with httpx.AsyncClient(timeout=60) as client:
-            resp = await client.post(
-                f"{self.base_url}/embeddings",
-                headers={"Authorization": f"Bearer {self.api_key}"},
-                json={"model": self.model, "input": texts},
-            )
-            resp.raise_for_status()
-            data = resp.json()
+        async def _call() -> dict:
+            async with httpx.AsyncClient(timeout=60) as client:
+                resp = await client.post(
+                    f"{self.base_url}/embeddings",
+                    headers={"Authorization": f"Bearer {self.api_key}"},
+                    json={"model": self.model, "input": texts},
+                )
+                resp.raise_for_status()
+                return resp.json()
 
+        data = await with_retry(_call)
         # 接口不保证返回顺序，按 index 排序兜底
         by_index = {item["index"]: item["embedding"] for item in data["data"]}
         return [by_index[i] for i in range(len(texts))]

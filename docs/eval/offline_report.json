@@ -3,15 +3,15 @@
   "tokenizer": "jieba",
   "reranker_api": true,
   "test_set": "C:\\Users\\kgnb666.DESKTOP-55DCFH3.003\\Desktop\\dp\\backend\\tests\\data\\test_set.json",
-  "corpus_chunks": 40,
+  "corpus_chunks": 85,
   "chunk_size": 200,
   "top_k": 1,
   "modes": [
     {
       "name": "纯向量检索",
-      "hits": 31,
-      "total": 32,
-      "accuracy": 0.9688,
+      "hits": 50,
+      "total": 52,
+      "accuracy": 0.9615,
       "details": [
         {
           "question": "什么是RAG？",
@@ -268,14 +268,174 @@
             "llm-notes.md"
           ],
           "hit": true
+        },
+        {
+          "question": "JVM 的内存区域有哪些，对象存在哪里",
+          "expected": "java-notes.md",
+          "top3": [
+            "java-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "HashMap 在 JDK8 为什么引入红黑树",
+          "expected": "java-notes.md",
+          "top3": [
+            "java-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "快排和归并排序的区别，谁更稳定",
+          "expected": "algo-notes.md",
+          "top3": [
+            "algo-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "动态规划和回溯分别适合解决什么问题",
+          "expected": "algo-notes.md",
+          "top3": [
+            "spring-notes.md"
+          ],
+          "hit": false
+        },
+        {
+          "question": "Spring 的 IoC 和 DI 是什么，有什么好处",
+          "expected": "spring-notes.md",
+          "top3": [
+            "spring-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Spring Boot 自动装配的原理是什么",
+          "expected": "spring-notes.md",
+          "top3": [
+            "spring-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "volatile 能保证什么，不能保证什么",
+          "expected": "concurrency-notes.md",
+          "top3": [
+            "concurrency-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "线程池的核心参数有哪些，怎么选",
+          "expected": "concurrency-notes.md",
+          "top3": [
+            "concurrency-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "缓存穿透、击穿、雪崩分别是什么，怎么解决",
+          "expected": "redis-notes.md",
+          "top3": [
+            "redis-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Redis 分布式锁怎么实现，有什么注意点",
+          "expected": "redis-notes.md",
+          "top3": [
+            "redis-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "为什么要在系统里引入消息队列",
+          "expected": "mq-notes.md",
+          "top3": [
+            "mq-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "消息队列怎么保证消息不丢失、不重复",
+          "expected": "mq-notes.md",
+          "top3": [
+            "mq-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "CAP 理论是什么，分布式系统怎么取舍",
+          "expected": "distributed-notes.md",
+          "top3": [
+            "distributed-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "一致性哈希解决什么问题，虚拟节点是干嘛的",
+          "expected": "distributed-notes.md",
+          "top3": [
+            "distributed-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "浏览器从输入 URL 到页面展示经历了什么",
+          "expected": "frontend-notes.md",
+          "top3": [
+            "frontend-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "HTTP 强缓存和协商缓存的区别",
+          "expected": "frontend-notes.md",
+          "top3": [
+            "frontend-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "单例模式有哪几种写法，哪种最安全",
+          "expected": "design-pattern-notes.md",
+          "top3": [
+            "design-pattern-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "开闭原则是什么，怎么在代码里体现",
+          "expected": "design-pattern-notes.md",
+          "top3": [
+            "design-pattern-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "设计一个短链系统，核心思路是什么",
+          "expected": "system-design-notes.md",
+          "top3": [
+            "system-design-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "秒杀系统的设计要点有哪些",
+          "expected": "system-design-notes.md",
+          "top3": [
+            "system-design-notes.md"
+          ],
+          "hit": true
         }
       ]
     },
     {
       "name": "混合检索",
-      "hits": 32,
-      "total": 32,
-      "accuracy": 1.0,
+      "hits": 51,
+      "total": 52,
+      "accuracy": 0.9808,
       "details": [
         {
           "question": "什么是RAG？",
@@ -305,9 +465,9 @@
           "question": "怎么评估一个问答系统答得忠不忠实",
           "expected": "rag-notes.md",
           "top3": [
-            "rag-notes.md"
+            "ml-notes.md"
           ],
-          "hit": true
+          "hit": false
         },
         {
           "question": "Dockerfile 中 CMD 指令的作用是什么",
@@ -530,6 +690,166 @@
           "expected": "llm-notes.md",
           "top3": [
             "llm-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "JVM 的内存区域有哪些，对象存在哪里",
+          "expected": "java-notes.md",
+          "top3": [
+            "java-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "HashMap 在 JDK8 为什么引入红黑树",
+          "expected": "java-notes.md",
+          "top3": [
+            "java-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "快排和归并排序的区别，谁更稳定",
+          "expected": "algo-notes.md",
+          "top3": [
+            "algo-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "动态规划和回溯分别适合解决什么问题",
+          "expected": "algo-notes.md",
+          "top3": [
+            "algo-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Spring 的 IoC 和 DI 是什么，有什么好处",
+          "expected": "spring-notes.md",
+          "top3": [
+            "spring-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Spring Boot 自动装配的原理是什么",
+          "expected": "spring-notes.md",
+          "top3": [
+            "spring-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "volatile 能保证什么，不能保证什么",
+          "expected": "concurrency-notes.md",
+          "top3": [
+            "concurrency-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "线程池的核心参数有哪些，怎么选",
+          "expected": "concurrency-notes.md",
+          "top3": [
+            "concurrency-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "缓存穿透、击穿、雪崩分别是什么，怎么解决",
+          "expected": "redis-notes.md",
+          "top3": [
+            "redis-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Redis 分布式锁怎么实现，有什么注意点",
+          "expected": "redis-notes.md",
+          "top3": [
+            "redis-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "为什么要在系统里引入消息队列",
+          "expected": "mq-notes.md",
+          "top3": [
+            "mq-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "消息队列怎么保证消息不丢失、不重复",
+          "expected": "mq-notes.md",
+          "top3": [
+            "mq-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "CAP 理论是什么，分布式系统怎么取舍",
+          "expected": "distributed-notes.md",
+          "top3": [
+            "distributed-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "一致性哈希解决什么问题，虚拟节点是干嘛的",
+          "expected": "distributed-notes.md",
+          "top3": [
+            "distributed-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "浏览器从输入 URL 到页面展示经历了什么",
+          "expected": "frontend-notes.md",
+          "top3": [
+            "frontend-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "HTTP 强缓存和协商缓存的区别",
+          "expected": "frontend-notes.md",
+          "top3": [
+            "frontend-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "单例模式有哪几种写法，哪种最安全",
+          "expected": "design-pattern-notes.md",
+          "top3": [
+            "design-pattern-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "开闭原则是什么，怎么在代码里体现",
+          "expected": "design-pattern-notes.md",
+          "top3": [
+            "design-pattern-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "设计一个短链系统，核心思路是什么",
+          "expected": "system-design-notes.md",
+          "top3": [
+            "system-design-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "秒杀系统的设计要点有哪些",
+          "expected": "system-design-notes.md",
+          "top3": [
+            "system-design-notes.md"
           ],
           "hit": true
         }
@@ -537,9 +857,9 @@
     },
     {
       "name": "混合+OverlapRerank",
-      "hits": 32,
-      "total": 32,
-      "accuracy": 1.0,
+      "hits": 51,
+      "total": 52,
+      "accuracy": 0.9808,
       "details": [
         {
           "question": "什么是RAG？",
@@ -569,9 +889,9 @@
           "question": "怎么评估一个问答系统答得忠不忠实",
           "expected": "rag-notes.md",
           "top3": [
-            "rag-notes.md"
+            "ml-notes.md"
           ],
-          "hit": true
+          "hit": false
         },
         {
           "question": "Dockerfile 中 CMD 指令的作用是什么",
@@ -794,6 +1114,166 @@
           "expected": "llm-notes.md",
           "top3": [
             "llm-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "JVM 的内存区域有哪些，对象存在哪里",
+          "expected": "java-notes.md",
+          "top3": [
+            "java-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "HashMap 在 JDK8 为什么引入红黑树",
+          "expected": "java-notes.md",
+          "top3": [
+            "java-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "快排和归并排序的区别，谁更稳定",
+          "expected": "algo-notes.md",
+          "top3": [
+            "algo-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "动态规划和回溯分别适合解决什么问题",
+          "expected": "algo-notes.md",
+          "top3": [
+            "algo-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Spring 的 IoC 和 DI 是什么，有什么好处",
+          "expected": "spring-notes.md",
+          "top3": [
+            "spring-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Spring Boot 自动装配的原理是什么",
+          "expected": "spring-notes.md",
+          "top3": [
+            "spring-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "volatile 能保证什么，不能保证什么",
+          "expected": "concurrency-notes.md",
+          "top3": [
+            "concurrency-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "线程池的核心参数有哪些，怎么选",
+          "expected": "concurrency-notes.md",
+          "top3": [
+            "concurrency-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "缓存穿透、击穿、雪崩分别是什么，怎么解决",
+          "expected": "redis-notes.md",
+          "top3": [
+            "redis-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Redis 分布式锁怎么实现，有什么注意点",
+          "expected": "redis-notes.md",
+          "top3": [
+            "redis-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "为什么要在系统里引入消息队列",
+          "expected": "mq-notes.md",
+          "top3": [
+            "mq-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "消息队列怎么保证消息不丢失、不重复",
+          "expected": "mq-notes.md",
+          "top3": [
+            "mq-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "CAP 理论是什么，分布式系统怎么取舍",
+          "expected": "distributed-notes.md",
+          "top3": [
+            "distributed-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "一致性哈希解决什么问题，虚拟节点是干嘛的",
+          "expected": "distributed-notes.md",
+          "top3": [
+            "distributed-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "浏览器从输入 URL 到页面展示经历了什么",
+          "expected": "frontend-notes.md",
+          "top3": [
+            "frontend-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "HTTP 强缓存和协商缓存的区别",
+          "expected": "frontend-notes.md",
+          "top3": [
+            "frontend-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "单例模式有哪几种写法，哪种最安全",
+          "expected": "design-pattern-notes.md",
+          "top3": [
+            "design-pattern-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "开闭原则是什么，怎么在代码里体现",
+          "expected": "design-pattern-notes.md",
+          "top3": [
+            "design-pattern-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "设计一个短链系统，核心思路是什么",
+          "expected": "system-design-notes.md",
+          "top3": [
+            "system-design-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "秒杀系统的设计要点有哪些",
+          "expected": "system-design-notes.md",
+          "top3": [
+            "system-design-notes.md"
           ],
           "hit": true
         }
@@ -801,9 +1281,9 @@
     },
     {
       "name": "混合+bge-reranker(API)",
-      "hits": 32,
-      "total": 32,
-      "accuracy": 1.0,
+      "hits": 51,
+      "total": 52,
+      "accuracy": 0.9808,
       "details": [
         {
           "question": "什么是RAG？",
@@ -833,9 +1313,9 @@
           "question": "怎么评估一个问答系统答得忠不忠实",
           "expected": "rag-notes.md",
           "top3": [
-            "rag-notes.md"
+            "ml-notes.md"
           ],
-          "hit": true
+          "hit": false
         },
         {
           "question": "Dockerfile 中 CMD 指令的作用是什么",
@@ -1058,6 +1538,166 @@
           "expected": "llm-notes.md",
           "top3": [
             "llm-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "JVM 的内存区域有哪些，对象存在哪里",
+          "expected": "java-notes.md",
+          "top3": [
+            "java-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "HashMap 在 JDK8 为什么引入红黑树",
+          "expected": "java-notes.md",
+          "top3": [
+            "java-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "快排和归并排序的区别，谁更稳定",
+          "expected": "algo-notes.md",
+          "top3": [
+            "algo-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "动态规划和回溯分别适合解决什么问题",
+          "expected": "algo-notes.md",
+          "top3": [
+            "algo-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Spring 的 IoC 和 DI 是什么，有什么好处",
+          "expected": "spring-notes.md",
+          "top3": [
+            "spring-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Spring Boot 自动装配的原理是什么",
+          "expected": "spring-notes.md",
+          "top3": [
+            "spring-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "volatile 能保证什么，不能保证什么",
+          "expected": "concurrency-notes.md",
+          "top3": [
+            "concurrency-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "线程池的核心参数有哪些，怎么选",
+          "expected": "concurrency-notes.md",
+          "top3": [
+            "concurrency-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "缓存穿透、击穿、雪崩分别是什么，怎么解决",
+          "expected": "redis-notes.md",
+          "top3": [
+            "redis-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "Redis 分布式锁怎么实现，有什么注意点",
+          "expected": "redis-notes.md",
+          "top3": [
+            "redis-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "为什么要在系统里引入消息队列",
+          "expected": "mq-notes.md",
+          "top3": [
+            "mq-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "消息队列怎么保证消息不丢失、不重复",
+          "expected": "mq-notes.md",
+          "top3": [
+            "mq-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "CAP 理论是什么，分布式系统怎么取舍",
+          "expected": "distributed-notes.md",
+          "top3": [
+            "distributed-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "一致性哈希解决什么问题，虚拟节点是干嘛的",
+          "expected": "distributed-notes.md",
+          "top3": [
+            "distributed-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "浏览器从输入 URL 到页面展示经历了什么",
+          "expected": "frontend-notes.md",
+          "top3": [
+            "frontend-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "HTTP 强缓存和协商缓存的区别",
+          "expected": "frontend-notes.md",
+          "top3": [
+            "frontend-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "单例模式有哪几种写法，哪种最安全",
+          "expected": "design-pattern-notes.md",
+          "top3": [
+            "design-pattern-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "开闭原则是什么，怎么在代码里体现",
+          "expected": "design-pattern-notes.md",
+          "top3": [
+            "design-pattern-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "设计一个短链系统，核心思路是什么",
+          "expected": "system-design-notes.md",
+          "top3": [
+            "system-design-notes.md"
+          ],
+          "hit": true
+        },
+        {
+          "question": "秒杀系统的设计要点有哪些",
+          "expected": "system-design-notes.md",
+          "top3": [
+            "system-design-notes.md"
           ],
           "hit": true
         }

@@ -101,17 +101,22 @@ class APIReranker:
     async def rerank(self, query: str, candidates: list) -> list:
         import httpx
 
-        async with httpx.AsyncClient(timeout=60) as client:
-            resp = await client.post(
-                f"{self.base_url}/rerank",
-                headers={"Authorization": f"Bearer {self.api_key}"},
-                json={
-                    "model": self.model,
-                    "query": query,
-                    "documents": [c.text for c in candidates],
-                    "top_n": self.top_n,
-                },
-            )
-            resp.raise_for_status()
-            data = resp.json()
+        from app.core.retry import with_retry
+
+        async def _call() -> dict:
+            async with httpx.AsyncClient(timeout=60) as client:
+                resp = await client.post(
+                    f"{self.base_url}/rerank",
+                    headers={"Authorization": f"Bearer {self.api_key}"},
+                    json={
+                        "model": self.model,
+                        "query": query,
+                        "documents": [c.text for c in candidates],
+                        "top_n": self.top_n,
+                    },
+                )
+                resp.raise_for_status()
+                return resp.json()
+
+        data = await with_retry(_call)
         return parse_rerank_response(data, candidates)

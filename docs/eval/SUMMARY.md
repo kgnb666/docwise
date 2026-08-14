@@ -1,17 +1,17 @@
 # DocWise 评测总结（自动生成）
 
-> 生成时间：2026-08-14 22:52
+> 生成时间：2026-08-15 00:11
 
 ## 检索命中率（真实 embedding）
 
 | 配置 | 命中 | 准确率 |
 |---|---|---|
-| 纯向量检索 | 31/32 | 96.9% |
-| 混合检索 | 32/32 | 100.0% |
-| 混合+OverlapRerank | 32/32 | 100.0% |
-| 混合+bge-reranker(API) | 32/32 | 100.0% |
+| 纯向量检索 | 50/52 | 96.2% |
+| 混合检索 | 51/52 | 98.1% |
+| 混合+OverlapRerank | 51/52 | 98.1% |
+| 混合+bge-reranker(API) | 51/52 | 98.1% |
 
-- 语料：40 块 | 测试集：C:\Users\kgnb666.DESKTOP-55DCFH3.003\Desktop\dp\backend\tests\data\test_set.json | top-k=1 | 分词：jieba
+- 语料：85 块 | 测试集：C:\Users\kgnb666.DESKTOP-55DCFH3.003\Desktop\dp\backend\tests\data\test_set.json | top-k=1 | 分词：jieba
 
 ## 生成质量（LLM-as-Judge）
 

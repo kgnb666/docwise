@@ -6,12 +6,12 @@
       "hit": true,
       "top_docs": [
         "rag-notes.md",
-        "README.md",
-        "git-notes.md"
+        "git-notes.md",
+        "llm-notes.md"
       ],
       "faithfulness": 1.0,
       "relevance": 1.0,
-      "answer_preview": "RAG（Retrieval-Augmented Generation，检索增强生成）是一种把「检索」和「生成」结合起来的架构。它的核心思想是：在让大语言模型生成回答之前，先从外部知识库中检索出与问题相关的资料片段，把这些片段作为上下文一起交"
+      "answer_preview": "根据资料 [1]，RAG（Retrieval-Augmented Generation，检索增强生成）是一种把「检索」和「生成」结合起来的架构。它的核心思想是：在让大语言模型生成回答之前，先从外部知识库中检索出与问题相关的资料片段，把这些片"
     },
     {
       "question": "RAG 的典型流程包含哪些环节",
@@ -20,7 +20,7 @@
       "top_docs": [
         "rag-notes.md",
         "git-notes.md",
-        "README.md"
+        "system-design-notes.md"
       ],
       "faithfulness": 1.0,
       "relevance": 1.0,
@@ -32,12 +32,12 @@
       "hit": true,
       "top_docs": [
         "rag-notes.md",
-        "llm-notes.md",
-        "db-notes.md"
+        "mq-notes.md",
+        "llm-notes.md"
       ],
       "faithfulness": 1.0,
       "relevance": 1.0,
-      "answer_preview": "根据参考资料，需要混合检索的原因及纯向量检索的缺点如下：\n\n**纯向量检索的缺点**：\n纯向量检索（语义检索）擅长处理\"意思相近但用词不同\"的查询，但遇到精确匹配的场景（如型号、代码、人名、专有名词）时容易失手 [1]。\n\n**为什么需要混"
+      "answer_preview": "根据资料 [1]，混合检索之所以必要，是因为**纯向量检索（语义检索）和关键词检索（如 BM25）各有优劣**：\n\n- **纯向量检索的缺点**：它擅长处理\"意思相近但用词不同\"的查询，但在遇到**精确匹配**的场景（如型号、代码、人名、专"
     },
     {
       "question": "怎么评估一个问答系统答得忠不忠实",
@@ -45,12 +45,12 @@
       "hit": true,
       "top_docs": [
         "rag-notes.md",
-        "README.md",
-        "README.md"
+        "llm-notes.md",
+        "ml-notes.md"
       ],
       "faithfulness": 1.0,
-      "relevance": 0.8,
-      "answer_preview": "根据参考资料，评估问答系统回答的忠实度，主要看**模型回答是否严格基于检索到的资料，有没有编造** [1]。\n\n具体来说，在评测 RAG 系统时，忠实度是常用指标之一，它与命中率/召回率、答案相关性共同构成评测体系 [1]。实践中需要自建测"
+      "relevance": 0.95,
+      "answer_preview": "评估问答系统回答的忠实度，可以参考资料中提到的 **RAG 系统评测指标**，具体如下：\n\n- **忠实度（Faithfulness）**：这是核心指标，指**模型回答是否严格基于检索到的资料，有没有编造** [1]。如果回答内容在提供的资"
     },
     {
       "question": "Dockerfile 中 CMD 指令的作用是什么",
@@ -59,11 +59,11 @@
       "top_docs": [
         "docker-notes.md",
         "ml-notes.md",
-        "os-notes.md"
+        "README.md"
       ],
       "faithfulness": 1.0,
       "relevance": 1.0,
-      "answer_preview": "根据参考资料，Dockerfile 中的 `CMD` 指令用于**指定容器启动时执行的默认命令**[1]。"
+      "answer_preview": "根据参考资料，Dockerfile 中的 CMD 指令用于指定**容器启动时执行的默认命令** [1]。"
     },
     {
       "question": "docker compose 有什么用处",
@@ -71,8 +71,8 @@
       "hit": true,
       "top_docs": [
         "docker-notes.md",
-        "README.md",
-        "git-notes.md"
+        "git-notes.md",
+        "concurrency-notes.md"
       ],
       "faithfulness": 1.0,
       "relevance": 1.0,
@@ -84,12 +84,12 @@
       "hit": true,
       "top_docs": [
         "docker-notes.md",
-        "llm-notes.md",
-        "git-notes.md"
+        "spring-notes.md",
+        "java-notes.md"
       ],
       "faithfulness": 1.0,
       "relevance": 0.9,
-      "answer_preview": "根据资料 [1]，Docker 容器与虚拟机相比，**更轻量、启动更快**，因为容器之间相互隔离，但又共享宿主机的操作系统内核 [1]。"
+      "answer_preview": "根据参考资料，Docker 容器与虚拟机相比的优势在于：**容器之间相互隔离，但又共享宿主机的操作系统内核，因此比虚拟机更轻量、启动更快** [1]。\n\n资料中未详细对比虚拟机的具体实现方式，但明确指出了容器在轻量性和启动速度上的优势。"
     },
     {
       "question": "把一个服务跑上线的步骤有哪些",
@@ -97,12 +97,12 @@
       "hit": true,
       "top_docs": [
         "docker-notes.md",
-        "README.md",
-        "git-notes.md"
+        "git-notes.md",
+        "system-design-notes.md"
       ],
       "faithfulness": 1.0,
       "relevance": 0.9,
-      "answer_preview": "根据参考资料，部署上线的基本流程如下 [1]：\n\n1. **写 Dockerfile**：把每个服务镜像化。\n2. **用 docker compose 编排**：通过 `docker-compose.yml` 定义并编排所有服务。\n3. "
+      "answer_preview": "根据参考资料，把一个服务跑上线的步骤可以总结如下：\n\n1. **镜像化服务**：为每个服务编写 Dockerfile，将应用及其运行环境打包成镜像 [1]。\n2. **编排服务**：使用 docker compose 编写 `docker-"
     },
     {
       "question": "git merge 和 rebase 有什么区别",
@@ -115,7 +115,7 @@
       ],
       "faithfulness": 1.0,
       "relevance": 1.0,
-      "answer_preview": "根据参考资料，`git merge` 和 `git rebase` 的区别如下：\n\n- **merge**：保留完整的提交历史，会生成一个\"合并提交\"，适合记录真实开发过程。[1]\n- **rebase**：把当前分支的提交\"重新铺\"到目标"
+      "answer_preview": "根据参考资料，git merge 和 rebase 的区别如下：\n\n- **merge**：保留完整的提交历史，会生成一个\"合并提交\"，适合记录真实开发过程。[1]\n- **rebase**：把当前分支的提交\"重新铺\"到目标分支顶端，历史是"
     },
     {
       "question": "已经推送到远程的提交怎么撤销，该用哪个命令",
@@ -127,8 +127,8 @@
         "git-notes.md"
       ],
       "faithfulness": 1.0,
-      "relevance": 0.9,
-      "answer_preview": "根据资料，撤销已推送到远程的提交应使用 `git revert <commit>` 命令。资料明确指出：\n\n> `git revert <commit>`：生成一个反向提交来撤销指定提交（适合公共分支）[1]\n\n**原因**：对于已推送的公"
+      "relevance": 1.0,
+      "answer_preview": "根据资料，对于已经推送到远程的提交，推荐使用 `git revert <commit>` 命令来撤销 [1]。\n\n具体原因如下：\n- `git revert` 会生成一个反向提交来撤销指定提交，这种方式**适合公共分支** [1]。\n- 而"
     },
     {
       "question": "GitHub Actions 是什么，怎么触发工作流",
@@ -140,8 +140,8 @@
         "os-notes.md"
       ],
       "faithfulness": 1.0,
-      "relevance": 0.95,
-      "answer_preview": "根据参考资料，GitHub Actions 是 GitHub 内置的 CI/CD 工具。你可以在 `.github/workflows/` 目录下编写 YAML 文件来定义工作流，每次 push 或 PR 时自动执行（如跑测试、构建、部署）"
+      "relevance": 0.9,
+      "answer_preview": "根据参考资料，GitHub Actions 是 GitHub 内置的 CI/CD 工具 [1][2]。\n\n它的工作方式是在仓库的 `.github/workflows/` 目录下编写 YAML 文件来定义工作流 [1][2]。工作流由 jo"
     },
     {
       "question": "提交信息为什么要带类型前缀，feat 和 fix 是什么意思",
@@ -153,8 +153,8 @@
         "rag-notes.md"
       ],
       "faithfulness": 1.0,
-      "relevance": 0.95,
-      "answer_preview": "根据参考资料，提交信息推荐使用 **Conventional Commits** 规范，带类型前缀是为了让历史可读、可自动生成 changelog [1]。\n\n其中：\n- **feat**：表示新功能 [1]\n- **fix**：表示修复 "
+      "relevance": 0.8,
+      "answer_preview": "根据参考资料，提交信息推荐使用 Conventional Commits 规范，格式如 `feat: 支持追问改写`。其中：\n\n- **feat**：表示新功能（feature）\n- **fix**：表示修复（bug fix）\n\n规范的提交"
     },
     {
       "question": "监督学习和无监督学习的区别",
@@ -162,12 +162,12 @@
       "hit": true,
       "top_docs": [
         "ml-notes.md",
-        "deep-learning-notes.md",
-        "os-notes.md"
+        "spring-notes.md",
+        "deep-learning-notes.md"
       ],
       "faithfulness": 1.0,
       "relevance": 1.0,
-      "answer_preview": "根据参考资料 [1]，监督学习和无监督学习的区别主要体现在**训练数据是否有标签**以及**学习目标**上：\n\n- **监督学习**：训练数据带标签（如\"这张图是猫\"），学习的是**输入到输出的映射**。典型任务包括分类（如垃圾邮件识别）和"
+      "answer_preview": "根据参考资料 [1]，监督学习和无监督学习的区别主要体现在**训练数据是否有标签**以及**学习目标**上：\n\n- **监督学习**：训练数据带标签（如\"这张图是猫\"），学习的是**输入到输出的映射**。典型任务有分类（垃圾邮件识别）和回归"
     },
     {
       "question": "模型在训练集表现好但测试集差，是什么问题怎么解决",
@@ -180,7 +180,7 @@
       ],
       "faithfulness": 1.0,
       "relevance": 1.0,
-      "answer_preview": "根据资料，模型在训练集表现好但测试集差，是典型的**过拟合**问题 [1]。\n\n**解决方法** [1]：\n- **交叉验证**：评估模型的泛化能力。\n- **正则化**：惩罚过大的参数。\n- **早停**：在验证集表现变差时停止训练。\n-"
+      "answer_preview": "根据资料 [1]，模型在训练集表现好但测试集差，这是**过拟合**问题。\n\n**定义**：模型把训练数据中的噪声也记住了，导致训练集表现好但测试集（泛化）表现差。\n\n**常见对策**（资料 [1] 中列出）：\n- **交叉验证**：评估模型"
     },
     {
       "question": "分类问题在类别不平衡时该用什么指标",
@@ -189,11 +189,11 @@
       "top_docs": [
         "ml-notes.md",
         "rag-notes.md",
-        "db-notes.md"
+        "algo-notes.md"
       ],
       "faithfulness": 1.0,
       "relevance": 0.9,
-      "answer_preview": "根据资料 [1]，在类别不平衡时，准确率会\"骗人\"，因此应该使用**精确率、召回率**或 **PR 曲线**来评估分类问题 [1]。\n\n具体来说，资料提到：\n> 注意类别不平衡时准确率会骗人，要用精确率/召回率或 PR 曲线 [1]。"
+      "answer_preview": "根据资料 [1]，在类别不平衡时，准确率会\"骗人\"，因此应该使用**精确率、召回率**或 **PR 曲线**来评估分类问题 [1]。"
     },
     {
       "question": "反向传播是怎么工作的",
@@ -205,8 +205,8 @@
         "git-notes.md"
       ],
       "faithfulness": 1.0,
-      "relevance": 0.9,
-      "answer_preview": "根据参考资料，反向传播是神经网络训练中的关键步骤，其工作原理如下：\n\n- **核心机制**：反向传播利用**链式法则**来求梯度，即从输出层开始，逐层向前计算损失函数对每个权重的梯度 [1]。\n- **配合使用**：计算出梯度后，再使用**"
+      "relevance": 0.8,
+      "answer_preview": "根据参考资料，反向传播是神经网络训练中的核心机制，其工作方式如下：\n\n- **基本原理**：反向传播利用**链式法则**来求梯度[1]。\n- **工作流程**：在前向传播逐层计算出输出之后，反向传播从输出层开始，逆向逐层计算损失函数对每个权"
     },
     {
       "question": "Transformer 为什么是大模型的基石",
@@ -215,11 +215,11 @@
       "top_docs": [
         "deep-learning-notes.md",
         "llm-notes.md",
-        "rag-notes.md"
+        "ml-notes.md"
       ],
       "faithfulness": 1.0,
       "relevance": 0.9,
-      "answer_preview": "根据参考资料，Transformer 之所以是大模型的基石，是因为它**用自注意力机制并行处理序列**，这是其核心优势 [1]。\n\n具体来说，相比 RNN 按时间步顺序处理序列（存在长依赖问题），Transformer 的自注意力机制能够并"
+      "answer_preview": "Transformer 之所以是大模型的基石，主要在于其**自注意力机制**能够**并行处理序列**，从而高效地捕捉长距离依赖关系 [1]。这与传统的 RNN 按时间步顺序处理不同，使得模型可以同时看到整个输入序列，极大提升了训练效率和对复"
     },
     {
       "question": "Adam 优化器和学习率调度分别解决什么问题",
@@ -228,11 +228,11 @@
       "top_docs": [
         "deep-learning-notes.md",
         "ml-notes.md",
-        "rag-notes.md"
+        "algo-notes.md"
       ],
       "faithfulness": 1.0,
       "relevance": 0.9,
-      "answer_preview": "根据参考资料，Adam 优化器和学习率调度解决的问题如下：\n\n- **Adam 优化器**：是训练神经网络时的默认优化器选择，用于更新权重，帮助模型收敛 [1]。\n- **学习率调度**：用于解决学习率设置的问题——学习率太大会导致不收敛，"
+      "answer_preview": "根据参考资料，Adam 优化器和学习率调度分别解决以下问题：\n\n- **Adam 优化器**：是训练神经网络时的**默认选择**，用于更新权重，能够稳定并加速训练过程 [1]。\n- **学习率调度**：用于解决学习率设置不当的问题——学习率"
     },
     {
       "question": "Python 里装饰器是干什么的，一般用在哪些场景",
@@ -240,25 +240,25 @@
       "hit": true,
       "top_docs": [
         "python-notes.md",
-        "db-notes.md",
+        "README.md",
         "docker-notes.md"
       ],
       "faithfulness": 1.0,
-      "relevance": 0.95,
-      "answer_preview": "根据资料 [1]，装饰器本质是\"接收函数返回函数\"的语法糖，常用于日志、鉴权、缓存。例如 `@lru_cache` 就是标准库自带的一个装饰器，给纯函数加记忆化缓存。\n\n简单来说，装饰器可以在不修改原函数代码的情况下，为函数增加额外的功能。"
+      "relevance": 0.9,
+      "answer_preview": "根据参考资料，Python 装饰器的本质是\"接收函数返回函数\"的语法糖，常用于日志、鉴权、缓存等场景 [1]。例如，标准库自带的 `@lru_cache` 就是一个装饰器，用于给纯函数添加记忆化缓存 [1]。\n\n资料中没有提及更多具体场景，"
     },
     {
       "question": "生成器适合什么场景，和 async 并发有什么区别",
       "expected": "python-notes.md",
       "hit": true,
       "top_docs": [
-        "python-notes.md",
+        "concurrency-notes.md",
         "git-notes.md",
-        "docker-notes.md"
+        "python-notes.md"
       ],
       "faithfulness": 1.0,
-      "relevance": 0.95,
-      "answer_preview": "根据参考资料 [1]，生成器（yield）采用惰性求值，适合**流式处理大文件**等场景。而 async/await 则用于 **IO 密集任务**（如网络请求、数据库），配合 asyncio 实现单线程并发。\n\n两者的核心区别在于：\n- "
+      "relevance": 0.9,
+      "answer_preview": "根据参考资料，生成器和 async 并发的主要区别如下：\n\n**生成器（yield）**：\n- 适合**流式处理大文件**等场景，采用惰性求值方式，按需生成数据，节省内存 [3]。\n\n**async/await 并发**：\n- 用于 **I"
     },
     {
       "question": "Python 3.7 之后字典有什么特性",
@@ -271,7 +271,7 @@
       ],
       "faithfulness": 1.0,
       "relevance": 0.9,
-      "answer_preview": "根据参考资料 [1]，Python 3.7+ 的字典（dict）是**保序的**，即会保持键值对的插入顺序。\n\n引用来源：[1]"
+      "answer_preview": "根据资料 [1]，Python 3.7+ 的字典（dict）是**保序的**，即会保持键值对的插入顺序。此外，字典基于哈希表实现，查询平均时间复杂度为 O(1)。"
     },
     {
       "question": "数据库事务的 ACID 分别指什么",
@@ -279,12 +279,12 @@
       "hit": true,
       "top_docs": [
         "db-notes.md",
-        "README.md",
-        "git-notes.md"
+        "distributed-notes.md",
+        "spring-notes.md"
       ],
       "faithfulness": 1.0,
       "relevance": 1.0,
-      "answer_preview": "根据参考资料，事务的 ACID 指的是以下四个特性 [1]：\n\n- **原子性（Atomicity）**：事务是一组操作，要么全部成功，要么全部回滚。\n- **一致性（Consistency）**：事务执行前后，数据库保持一致状态。\n- *"
+      "answer_preview": "根据参考资料 [1]，事务的 ACID 分别指：\n\n- **原子性（Atomicity）**：事务是一组操作，要么全部成功，要么全部回滚。\n- **一致性（Consistency）**：事务执行前后，数据保持一致状态。\n- **隔离性（Is"
     },
     {
       "question": "MySQL 为什么用 B+ 树做索引而不是哈希表",
@@ -292,12 +292,12 @@
       "hit": true,
       "top_docs": [
         "db-notes.md",
-        "python-notes.md",
-        "rag-notes.md"
+        "algo-notes.md",
+        "mq-notes.md"
       ],
       "faithfulness": 0.6,
-      "relevance": 0.9,
-      "answer_preview": "根据参考资料，MySQL InnoDB 使用 B+ 树做索引，主要原因是：\n\n- **适合磁盘 IO**：B+ 树内部节点只存键、叶子节点存数据，扇出高、树矮，能减少磁盘 IO 次数 [1]。\n- **支持范围查询**：B+ 树叶子节点有序"
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料，MySQL 使用 B+ 树做索引的原因可以从以下几个方面理解：\n\n1. **支持范围查询和排序**：B+ 树的叶子节点有序存储数据，天然支持范围查询（如 `WHERE id > 100`）和排序操作。而哈希表只支持等值查询（`"
     },
     {
       "question": "一条 SQL 很慢，你会怎么排查优化",
@@ -305,12 +305,12 @@
       "hit": true,
       "top_docs": [
         "db-notes.md",
-        "rag-notes.md",
-        "deep-learning-notes.md"
+        "algo-notes.md",
+        "redis-notes.md"
       ],
-      "faithfulness": 1.0,
-      "relevance": 0.95,
-      "answer_preview": "根据参考资料，排查和优化慢 SQL 可以按以下步骤进行：\n\n1. **使用 EXPLAIN 查看执行计划**：检查 `type` 是否为 `index` 或 `range`，确认是否走了索引，以及是否有全表扫描的迹象。[1]\n\n2. **检"
+      "faithfulness": 0.95,
+      "relevance": 1.0,
+      "answer_preview": "一条 SQL 很慢时，可以按以下思路排查和优化：\n\n## 1. 先用 EXPLAIN 看执行计划\n- 检查 `type` 是否为 `index`/`range`，确认是否走了索引 [1]\n- 看是否出现全表扫描（`ALL`），以及扫描行数是"
     },
     {
       "question": "TCP 三次握手是为了解决什么问题",
@@ -318,12 +318,12 @@
       "hit": true,
       "top_docs": [
         "network-notes.md",
-        "rag-notes.md",
-        "git-notes.md"
+        "distributed-notes.md",
+        "concurrency-notes.md"
       ],
       "faithfulness": 1.0,
       "relevance": 1.0,
-      "answer_preview": "TCP 三次握手（SYN → SYN+ACK → ACK）的目的是**双方确认彼此的收发能力**，确保连接建立可靠 [1]。\n\n具体来说，通过三次握手，客户端和服务端可以互相确认：\n- 自己的发送能力正常\n- 对方的接收能力正常\n- 对方的"
+      "answer_preview": "根据参考资料，TCP 三次握手（SYN → SYN+ACK → ACK）的目的是**双方确认收发能力** [1]。\n\n具体来说，通过三次握手，通信双方能够确认彼此的发送和接收能力都是正常的，从而为后续的数据传输建立可靠的连接基础 [1]。"
     },
     {
       "question": "HTTPS 是怎么做到防冒充和防窃听的",
@@ -331,12 +331,12 @@
       "hit": true,
       "top_docs": [
         "network-notes.md",
-        "git-notes.md",
-        "docker-notes.md"
+        "redis-notes.md",
+        "distributed-notes.md"
       ],
       "faithfulness": 1.0,
       "relevance": 1.0,
-      "answer_preview": "根据参考资料，HTTPS 在 TCP 之上加了一层 TLS，通过以下两步实现防冒充和防窃听：\n\n1. **防冒充（证书校验）**：通过证书校验来确认服务器身份，防止被冒充 [1]。\n2. **防窃听（加密传输）**：通过密钥协商（如 ECD"
+      "answer_preview": "HTTPS 通过 **TLS 层** 实现防冒充和防窃听，具体机制如下：\n\n1. **防冒充（证书校验）**：  \n   服务器需向 CA（证书颁发机构）申请证书，客户端在握手时校验证书的合法性（如域名匹配、CA 签名有效），防止中间人冒充"
     },
     {
       "question": "429 状态码代表什么",
@@ -344,12 +344,12 @@
       "hit": true,
       "top_docs": [
         "network-notes.md",
-        "README.md",
-        "git-notes.md"
+        "design-pattern-notes.md",
+        "distributed-notes.md"
       ],
       "faithfulness": 1.0,
       "relevance": 1.0,
-      "answer_preview": "根据参考资料，429 状态码代表**限流**（客户端请求过于频繁，被服务器限制）[1]。"
+      "answer_preview": "根据参考资料，429 状态码代表**限流**（客户端错误）[1]。"
     },
     {
       "question": "死锁产生的四个必要条件是什么",
@@ -357,12 +357,12 @@
       "hit": true,
       "top_docs": [
         "os-notes.md",
-        "docker-notes.md",
-        "README.md"
+        "redis-notes.md",
+        "java-notes.md"
       ],
       "faithfulness": 1.0,
       "relevance": 1.0,
-      "answer_preview": "根据参考资料，死锁产生的四个必要条件是 [1]：\n\n1. **互斥**：资源不能被多个进程同时共享使用。\n2. **持有并等待**：进程持有至少一个资源，同时等待获取其他被占用的资源。\n3. **不可剥夺**：已分配给进程的资源不能被强制剥"
+      "answer_preview": "根据参考资料，死锁产生的四个必要条件是[1]：\n\n1. **互斥**：资源不能被多个进程同时共享使用。\n2. **持有并等待**：进程持有至少一个资源，同时等待获取其他进程持有的资源。\n3. **不可剥夺**：已分配给进程的资源不能被强制剥"
     },
     {
       "question": "进程和线程分别是什么，切换开销为什么不同",
@@ -370,12 +370,12 @@
       "hit": true,
       "top_docs": [
         "os-notes.md",
-        "git-notes.md",
-        "rag-notes.md"
+        "concurrency-notes.md",
+        "git-notes.md"
       ],
       "faithfulness": 1.0,
-      "relevance": 0.95,
-      "answer_preview": "根据资料 [1]：\n\n- **进程**是资源分配的最小单位，拥有独立的地址空间。\n- **线程**是 CPU 调度的最小单位，共享进程的资源。\n\n**切换开销不同的原因**：线程切换比进程切换轻量，因为线程共享进程的资源（如地址空间），而进"
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料：\n\n**进程**是资源分配的最小单位，拥有独立的地址空间；**线程**是 CPU 调度的最小单位，共享进程的资源。[1]\n\n**切换开销不同的原因**：线程切换比进程切换轻量，因为线程共享进程的资源（如地址空间），切换时不需要"
     },
     {
       "question": "大模型为什么会一本正经地胡说八道，怎么缓解",
@@ -388,7 +388,7 @@
       ],
       "faithfulness": 1.0,
       "relevance": 1.0,
-      "answer_preview": "大模型“一本正经地胡说八道”（即幻觉）的原因和缓解方法如下：\n\n**原因**：大模型是概率生成模型，不是查数据库，因此可能生成看似合理但实际错误的内容 [1]。\n\n**缓解方法** [1]：\n- **检索增强（RAG）**：提供事实依据，让"
+      "answer_preview": "大模型\"一本正经地胡说八道\"（即幻觉）的原因及缓解方法如下：\n\n**原因**：大模型是概率生成模型，不是查数据库，因此可能生成看似合理但实际错误的内容 [1]。\n\n**缓解方法** [1]：\n1. **检索增强（RAG）**：提供事实依据，"
     },
     {
       "question": "LoRA 微调相比全参微调有什么优势",
@@ -397,11 +397,11 @@
       "top_docs": [
         "llm-notes.md",
         "rag-notes.md",
-        "ml-notes.md"
+        "mq-notes.md"
       ],
       "faithfulness": 1.0,
-      "relevance": 0.95,
-      "answer_preview": "根据参考资料[1]，LoRA（参数高效微调）相比全参微调的优势是：**只训练少量低秩矩阵，省显存、效果好，是主流做法**。\n\n具体来说：\n- **省显存**：LoRA 只训练少量低秩矩阵，而不是更新全部模型参数，因此显存占用更少。\n- **"
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料 [1]，LoRA（参数高效微调）相比全参微调的优势是：**只训练少量低秩矩阵，省显存、效果好，是主流做法** [1]。\n\n具体来说，LoRA 属于参数高效微调方法，它不需要更新模型的所有参数，而是只训练一小部分低秩矩阵，这样既"
     },
     {
       "question": "Function Calling 是怎么让模型调用工具的",
@@ -409,16 +409,276 @@
       "hit": true,
       "top_docs": [
         "llm-notes.md",
-        "rag-notes.md",
-        "ml-notes.md"
+        "design-pattern-notes.md",
+        "rag-notes.md"
       ],
       "faithfulness": 1.0,
       "relevance": 1.0,
-      "answer_preview": "根据参考资料，Function Calling 的工作机制如下：\n\n1. **声明工具**：给模型声明可用的工具，包括工具的名称、描述和参数 Schema（即参数的结构化定义）[1]。\n2. **模型请求调用**：模型根据用户的问题，按需请"
+      "answer_preview": "根据参考资料，Function Calling 的工作机制如下：\n\n1. **声明工具**：给模型声明可用的工具，包括名称、描述和参数 Schema（即参数的结构化定义）[1]。\n2. **模型请求调用**：模型根据用户问题，按需请求调用某"
+    },
+    {
+      "question": "JVM 的内存区域有哪些，对象存在哪里",
+      "expected": "java-notes.md",
+      "hit": true,
+      "top_docs": [
+        "java-notes.md",
+        "concurrency-notes.md",
+        "redis-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料 [1]，JVM 运行时数据区包括：\n\n- **堆**：存放对象实例，是垃圾回收（GC）的主战场。\n- **方法区/元空间**：存放类元数据。\n- **虚拟机栈**：存放方法帧和局部变量。\n- **本地方法栈**：用于本地方法调"
+    },
+    {
+      "question": "HashMap 在 JDK8 为什么引入红黑树",
+      "expected": "java-notes.md",
+      "hit": true,
+      "top_docs": [
+        "java-notes.md",
+        "mq-notes.md",
+        "redis-notes.md"
+      ],
+      "faithfulness": 0.9,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料 [1]，HashMap 在 JDK8 中引入红黑树是为了**降低哈希冲突严重时的查询性能退化**。\n\n具体来说：\n- HashMap 底层是**数组+链表+红黑树**的结构。\n- 当链表长度**超过 8** 时，链表会转换为红"
+    },
+    {
+      "question": "快排和归并排序的区别，谁更稳定",
+      "expected": "algo-notes.md",
+      "hit": true,
+      "top_docs": [
+        "algo-notes.md",
+        "redis-notes.md",
+        "db-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.95,
+      "answer_preview": "根据参考资料，快排和归并排序的区别及稳定性如下：\n\n**区别：**\n- **快排**：原地分治，平均时间复杂度 O(n log n)，最坏 O(n²) [1]\n- **归并**：稳定排序，需要额外空间，适合链表排序 [1]\n\n**稳定性：*"
+    },
+    {
+      "question": "动态规划和回溯分别适合解决什么问题",
+      "expected": "algo-notes.md",
+      "hit": true,
+      "top_docs": [
+        "algo-notes.md",
+        "rag-notes.md",
+        "git-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料，动态规划和回溯的适用场景如下：\n\n- **动态规划**：适合解决**最值问题**，核心是\"状态定义 + 转移方程 + 边界\"，可用滚动数组优化空间 [1]。\n- **回溯**：适合解决**组合、排列、棋盘类问题**，注意剪枝优"
+    },
+    {
+      "question": "Spring 的 IoC 和 DI 是什么，有什么好处",
+      "expected": "spring-notes.md",
+      "hit": true,
+      "top_docs": [
+        "spring-notes.md",
+        "ml-notes.md",
+        "design-pattern-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料 [1]，Spring 的 IoC（控制反转）和 DI（依赖注入）概念及好处如下：\n\n- **IoC（控制反转）**：对象的创建和依赖管理交给容器，而不是自己 `new`。\n- **DI（依赖注入）**：是 IoC 的实现方式，"
+    },
+    {
+      "question": "Spring Boot 自动装配的原理是什么",
+      "expected": "spring-notes.md",
+      "hit": true,
+      "top_docs": [
+        "spring-notes.md",
+        "design-pattern-notes.md",
+        "docker-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "Spring Boot 自动装配的核心原理如下：\n\n1. **入口注解**：`@SpringBootApplication` 实际上由三个注解组合而成：`@Configuration` + `@EnableAutoConfiguration"
+    },
+    {
+      "question": "volatile 能保证什么，不能保证什么",
+      "expected": "concurrency-notes.md",
+      "hit": true,
+      "top_docs": [
+        "concurrency-notes.md",
+        "design-pattern-notes.md",
+        "mq-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料 [1]：\n\n- **volatile 能保证**：可见性与有序性（防止指令重排）。\n- **volatile 不能保证**：原子性（如 `i++` 仍不安全）。\n\n因此，volatile 适用于多线程环境下的状态标记或单次读写"
+    },
+    {
+      "question": "线程池的核心参数有哪些，怎么选",
+      "expected": "concurrency-notes.md",
+      "hit": true,
+      "top_docs": [
+        "concurrency-notes.md",
+        "os-notes.md",
+        "ml-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.6,
+      "answer_preview": "根据参考资料，线程池的核心参数包括：\n\n- **核心线程数**：线程池中常驻的线程数量。\n- **最大线程数**：线程池允许创建的最大线程数量。\n- **队列**：用于存放等待执行的任务。\n- **拒绝策略**：当任务无法执行时的处理方式，"
+    },
+    {
+      "question": "缓存穿透、击穿、雪崩分别是什么，怎么解决",
+      "expected": "redis-notes.md",
+      "hit": true,
+      "top_docs": [
+        "redis-notes.md",
+        "system-design-notes.md",
+        "frontend-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料，缓存穿透、击穿、雪崩的定义及解决方案如下：\n\n### 1. 缓存穿透\n- **定义**：查询一个**不存在的数据**，缓存和数据库都没有，导致每次请求都直接打到数据库。\n- **解决方案**：\n  - 缓存空值（即使查不到也缓"
+    },
+    {
+      "question": "Redis 分布式锁怎么实现，有什么注意点",
+      "expected": "redis-notes.md",
+      "hit": true,
+      "top_docs": [
+        "redis-notes.md",
+        "concurrency-notes.md",
+        "git-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.9,
+      "answer_preview": "根据参考资料 [1]，Redis 分布式锁的实现和注意点如下：\n\n### 实现方式\n使用 `SET key value NX EX ttl` 命令实现：\n- **NX**：保证只有 key 不存在时才能设置成功（互斥性）\n- **EX**："
+    },
+    {
+      "question": "为什么要在系统里引入消息队列",
+      "expected": "mq-notes.md",
+      "hit": true,
+      "top_docs": [
+        "mq-notes.md",
+        "system-design-notes.md",
+        "rag-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料，引入消息队列主要有三大作用 [1]：\n\n1. **异步**：用户请求可以先返回，耗时操作后置处理，提升响应速度。\n2. **削峰**：突发流量可以排队消化，避免系统被瞬时高峰冲垮。\n3. **解耦**：上下游系统互不感知，可以"
+    },
+    {
+      "question": "消息队列怎么保证消息不丢失、不重复",
+      "expected": "mq-notes.md",
+      "hit": true,
+      "top_docs": [
+        "mq-notes.md",
+        "concurrency-notes.md",
+        "redis-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料，消息队列保证消息不丢失、不重复的措施如下：\n\n## 消息不丢失\n从三个环节分别保证：\n- **生产者**：开启 ack 确认机制，确保消息成功发送到 Broker [1]\n- **Broker**：消息落盘 + 副本机制，防止"
+    },
+    {
+      "question": "CAP 理论是什么，分布式系统怎么取舍",
+      "expected": "distributed-notes.md",
+      "hit": true,
+      "top_docs": [
+        "distributed-notes.md",
+        "rag-notes.md",
+        "os-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.95,
+      "answer_preview": "根据参考资料，CAP 理论是指分布式系统中一致性（Consistency）、可用性（Availability）、分区容错性（Partition tolerance）三者最多只能满足其二 [1]。\n\n由于网络分区在分布式系统中是必然发生的，所"
+    },
+    {
+      "question": "一致性哈希解决什么问题，虚拟节点是干嘛的",
+      "expected": "distributed-notes.md",
+      "hit": true,
+      "top_docs": [
+        "distributed-notes.md",
+        "redis-notes.md",
+        "concurrency-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.9,
+      "answer_preview": "根据参考资料，一致性哈希主要解决**\"节点增减导致大量缓存失效\"**的问题 [1]。\n\n虚拟节点的作用是**缓解数据倾斜** [1]。通过引入虚拟节点，可以让数据在物理节点上的分布更加均匀，避免因节点数量少或哈希分布不均导致某些节点负载过高"
+    },
+    {
+      "question": "浏览器从输入 URL 到页面展示经历了什么",
+      "expected": "frontend-notes.md",
+      "hit": true,
+      "top_docs": [
+        "frontend-notes.md",
+        "rag-notes.md",
+        "db-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 0.6,
+      "answer_preview": "根据参考资料，浏览器从输入 URL 到页面展示主要涉及以下流程：\n\n**1. 渲染流程** [1]\n- HTML 解析成 DOM 树\n- CSS 解析成 CSSOM\n- 合并成渲染树\n- 布局（Layout）\n- 绘制（Paint）\n- 合"
+    },
+    {
+      "question": "HTTP 强缓存和协商缓存的区别",
+      "expected": "frontend-notes.md",
+      "hit": true,
+      "top_docs": [
+        "frontend-notes.md",
+        "network-notes.md",
+        "redis-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料，HTTP 强缓存和协商缓存的区别如下：\n\n- **强缓存**：命中后直接使用本地缓存，**不会发送请求**到服务器。通过 `Cache-Control`（如 `max-age`）等响应头控制。[1]\n- **协商缓存**：需要"
+    },
+    {
+      "question": "单例模式有哪几种写法，哪种最安全",
+      "expected": "design-pattern-notes.md",
+      "hit": true,
+      "top_docs": [
+        "design-pattern-notes.md",
+        "concurrency-notes.md",
+        "llm-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料，单例模式有以下几种写法：\n\n1. **饿汉式**：类加载时即创建实例。\n2. **懒汉式**：双重检查锁 + `volatile` 保证线程安全。\n3. **枚举单例**：最安全，能防止反射和序列化破坏单例。\n\n其中，**枚举"
+    },
+    {
+      "question": "开闭原则是什么，怎么在代码里体现",
+      "expected": "design-pattern-notes.md",
+      "hit": true,
+      "top_docs": [
+        "design-pattern-notes.md",
+        "git-notes.md",
+        "git-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料，开闭原则是 SOLID 设计原则之一，其核心含义是 **\"对扩展开放，对修改关闭\"** [1]。\n\n**在代码中的体现方式：**\n\n1. **通过接口或抽象类实现扩展**：定义稳定的抽象接口，新增功能时通过实现新类来扩展，而不"
+    },
+    {
+      "question": "设计一个短链系统，核心思路是什么",
+      "expected": "system-design-notes.md",
+      "hit": true,
+      "top_docs": [
+        "system-design-notes.md",
+        "design-pattern-notes.md",
+        "concurrency-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料 [1]，短链系统的核心思路是：\n\n**发号器（生成唯一ID）+ 62进制编码 + 缓存映射**\n\n具体拆解如下：\n\n1. **发号器**：生成全局唯一的数字ID，常用方案有雪花算法或数据库自增ID。\n2. **62进制编码**"
+    },
+    {
+      "question": "秒杀系统的设计要点有哪些",
+      "expected": "system-design-notes.md",
+      "hit": true,
+      "top_docs": [
+        "system-design-notes.md",
+        "design-pattern-notes.md",
+        "concurrency-notes.md"
+      ],
+      "faithfulness": 1.0,
+      "relevance": 1.0,
+      "answer_preview": "根据参考资料 [1]，秒杀系统的设计要点如下：\n\n- **前端限流**：在用户请求入口处进行流量控制，防止大量请求直接冲击后端。\n- **网关限流**：在网关层统一进行限流，进一步过滤和缓冲流量。\n- **Redis 预扣减库存**：利用 "
     }
   ],
   "recall": 1.0,
-  "avg_faithfulness": 0.9875,
-  "avg_relevance": 0.9547,
-  "count": 32
+  "avg_faithfulness": 0.9894,
+  "avg_relevance": 0.9529,
+  "count": 52
 }
