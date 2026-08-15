@@ -13,6 +13,10 @@ import tempfile
 os.environ["OPENAI_API_KEY"] = ""
 os.environ["EMBEDDING_API_KEY"] = ""
 os.environ["EMBEDDING_PROVIDER"] = "hash"
+# 兜底模式锁定 strict：离线测试不触发真实 LLM 调用
+os.environ["FALLBACK_MODE"] = "strict"
+# 相关度阈值归零：离线哈希嵌入分数整体偏低，避免被 .env 的真实阈值误过滤
+os.environ["SCORE_THRESHOLD"] = "0"
 # 数据目录隔离：测试不写真实 data/（持久化快照落到临时目录）
 os.environ["DATA_DIR"] = tempfile.mkdtemp(prefix="docwise-test-")
 

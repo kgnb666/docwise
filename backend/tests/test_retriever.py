@@ -43,3 +43,16 @@ def test_hybrid_retrieve_returns_sorted():
     assert len(results) == 2
     assert results[0].chunk_id == "c2"
     assert results[0].doc_name == "b.md"
+
+
+def test_score_threshold_filters_irrelevant():
+    store = InMemoryVectorStore()
+    store.add("c1", [1.0, 0.0], {"text": "苹果香蕉", "doc_id": "d1", "doc_name": "a.md", "index": 0})
+    # 相关度阈值：低相似度结果被过滤 → 空结果（触发兜底）
+    retriever = Retriever(store, top_k=2, rerank_top_k=2, alpha=0.0, score_threshold=0.9)
+    results = retriever.retrieve("机器学习", query_vector=[0.0, 1.0])
+    assert results == []
+
+    # 阈值 0：不过滤
+    retriever2 = Retriever(store, top_k=2, rerank_top_k=2, alpha=0.0, score_threshold=0.0)
+    assert len(retriever2.retrieve("机器学习", query_vector=[0.0, 1.0])) == 1

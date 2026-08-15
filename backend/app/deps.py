@@ -52,6 +52,7 @@ def get_retriever() -> Retriever:
         rerank_top_k=_settings.rerank_top_k,
         alpha=_settings.hybrid_alpha,
         reranker=get_reranker(),
+        score_threshold=_settings.score_threshold,
     )
 
 

@@ -29,6 +29,16 @@ _SYSTEM_PROMPT = """你是「DocWise」智能知识库助手，负责基于提�
 3. 回答用中文，简洁、有条理，可用 Markdown。
 """
 
+# 常识兜底模式（fallback_mode=chat）下的系统提示：
+# 知识库没命中时，允许模型基于自身知识或联网工具回答，兼顾可用性。
+_FALLBACK_SYSTEM_PROMPT = """你是「DocWise」助手。用户的问题没有命中知识库。
+
+规则：
+1. 可以基于你的常识回答（生活常识、通识问题）；不确定时明确说明；
+2. 需要实时/外部信息时，使用可用工具（如 wiki_search）查证后再回答；
+3. 回答用中文，简洁、有条理；不要假装引用了知识库资料（本回答无引用）。
+"""
+
 
 def build_messages(
     query: str, chunks: list[RetrievedChunk], history: list[dict]
@@ -115,12 +125,26 @@ class RagPipeline:
         chunks = await self._retrieve(retrieval_query)
         yield {"type": "citations", "citations": self._citations(chunks)}
 
-        # 3) 无资料时的兜底提示（面试可讲：显式处理"知识库外问题"）
+        # 3) 无资料时的兜底（两种模式可配，面试可讲产品权衡）
+        #    strict：只答知识库，防幻觉人设；chat：允许模型用常识/联网工具回答
         if not chunks:
-            yield {
-                "type": "delta",
-                "content": "抱歉，知识库中还没有相关内容。请先上传文档，或换个问法试试。",
-            }
+            if self.settings.fallback_mode != "chat":
+                yield {
+                    "type": "delta",
+                    "content": "抱歉，知识库中还没有相关内容。请先上传文档，或换个问法试试。",
+                }
+                yield {"type": "done"}
+                return
+            messages = [
+                {"role": "system", "content": _FALLBACK_SYSTEM_PROMPT},
+                {"role": "user", "content": retrieval_query},
+            ]
+            if self.settings.agent_enabled and TOOL_REGISTRY:
+                async for event in self.agent.run(messages, tools=list(TOOL_REGISTRY.values())):
+                    yield event
+            else:
+                async for event in self.llm.stream_chat(messages):
+                    yield event
             yield {"type": "done"}
             return
 

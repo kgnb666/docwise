@@ -72,3 +72,32 @@ def test_query_rewrite_event_emitted_first():
     asyncio.run(collect())
     assert events and events[0]["type"] == "query_rewritten"
     assert "什么是RAG" in events[0]["rewritten"]
+
+
+class _FakeLLM:
+    """替代真实 LLM：返回固定 delta，验证 chat 兜底路径。"""
+
+    async def stream_chat(self, messages, tools=None):
+        assert "fallback" not in str(messages)  # 占位：messages 应该走常识提示
+        yield {"type": "delta", "content": "中秋节是中国的传统节日。"}
+
+
+def test_fallback_chat_mode_answers_without_knowledge_base():
+    """chat 兜底：知识库为空时调用 LLM 常识回答，而不是返回固定文案。"""
+    # 空库 pipeline（检索必然无命中）
+    settings = Settings(embedding_provider="hash", fallback_mode="chat", agent_enabled=False)
+    retriever = Retriever(InMemoryVectorStore(), top_k=2, rerank_top_k=2, alpha=0.0)
+    p = RagPipeline(SpyEmbedder(), retriever, settings, retrieval_cache=None)
+    p.llm = _FakeLLM()
+
+    events: list[dict] = []
+
+    async def collect():
+        async for ev in p.stream_answer("什么是中秋节", []):
+            events.append(ev)
+
+    asyncio.run(collect())
+    types = [e["type"] for e in events]
+    assert types == ["citations", "delta", "done"]
+    assert "中秋节" in events[1]["content"]
+    assert events[0]["citations"] == []  # 无引用（未命中知识库）

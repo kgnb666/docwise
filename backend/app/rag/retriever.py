@@ -91,12 +91,15 @@ class Retriever:
         rerank_top_k: int = 3,
         alpha: float = 0.4,
         reranker=None,
+        score_threshold: float = 0.0,
     ):
         self.store = vector_store
         self.top_k = top_k
         self.rerank_top_k = rerank_top_k
         self.alpha = alpha  # 混合权重：alpha 偏向 BM25
         self.reranker = reranker or NullReranker()
+        # 相关度阈值：低于则视为"未命中"（进入知识库外兜底分支）
+        self.score_threshold = score_threshold
         self._bm25: BM25 | None = None
         self._bm25_revision: int = -1
 
@@ -166,4 +169,11 @@ class Retriever:
 
         # 5) Rerank 精排：对粗召回候选重新排序（Null=不重排 / Overlap=轻量重排 / 后续可换 bge-reranker）
         candidates = self.reranker.rerank(query, candidates)
+
+        # 6) 相关度阈值过滤：低于视为"未命中"（触发知识库外兜底）。
+        #    注意：必须用原始向量相似度（score_vector，未 min-max 归一化）——
+        #    归一化会把小语料里的最高分顶到 1.0，使绝对阈值失效。
+        if self.score_threshold > 0:
+            candidates = [c for c in candidates if c.score_vector >= self.score_threshold]
+
         return candidates[: self.rerank_top_k]

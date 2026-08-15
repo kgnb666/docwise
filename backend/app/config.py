@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     # Rerank：null（不重排）| overlap（轻量重叠精排，MVP）
     reranker: str = "overlap"
     rerank_alpha: float = 0.3
+    # 相关度阈值：低于该分数的检索结果视为"未命中"（触发兜底）。
+    # 真实嵌入（bge-m3）下相关块 ≈ 0.7、无关 ≈ 0.1，取 0.3；离线哈希嵌入请保持 0.0
+    score_threshold: float = 0.0
 
     # Agent 工具调用
     agent_enabled: bool = True
@@ -52,6 +55,10 @@ class Settings(BaseSettings):
 
     # 追问改写
     query_rewrite_enabled: bool = True
+
+    # 知识库未命中时的兜底模式：
+    # strict —— 只答知识库（防幻觉人设）；chat —— 允许模型用常识/联网工具回答
+    fallback_mode: str = "chat"
 
     # 检索结果缓存（热点问答跳过 embedding 调用）
     retrieval_cache_enabled: bool = True
