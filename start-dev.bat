@@ -1,21 +1,22 @@
 @echo off
-REM ===== DocWise 一键启动（开发模式）=====
-REM 双击本文件：自动打开后端 + 前端两个终端窗口
-REM 启动后浏览器访问 http://localhost:5173
+REM ===== DocWise Quick Start (Dev Mode) =====
+REM Double-click to start backend + frontend in two windows
+REM Then open http://localhost:5173
+chcp 65001 >nul
 
-echo 正在启动 DocWise...
+echo Starting DocWise (Dev Mode)...
 
-REM 启动后端（FastAPI，端口 8000）
+REM Backend (FastAPI, port 8000)
 start "DocWise Backend" cmd /k "cd /d %~dp0backend && .venv\Scripts\uvicorn app.main:app --reload --port 8000"
 
-REM 启动前端（Vite，端口 5173，/api 自动代理到后端）
+REM Frontend (Vite, port 5173, /api proxied to backend)
 start "DocWise Frontend" cmd /k "cd /d %~dp0frontend && npm run dev"
 
 echo.
 echo ============================================
-echo  后端接口文档: http://localhost:8000/docs
-echo  前端页面:     http://localhost:5173
-echo  停止: 直接关闭两个黑色窗口即可
+echo   API Docs : http://localhost:8000/docs
+echo   Web UI   : http://localhost:5173
+echo   Stop     : close the two black windows
 echo ============================================
 echo.
 pause
