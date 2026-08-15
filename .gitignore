@@ -21,7 +21,9 @@ npm-debug.log*
 # 数据文件
 *.db
 *.sqlite3
-/backend/data/      # 运行时数据（上传/向量持久化）；注意不能写 data/（会误伤 tests/data 测试集）
+# 运行时数据（上传/向量持久化）；注意：不能写 data/（会误伤 tests/data 测试集），
+# 且 gitignore 不支持行内注释，模式必须单独成行
+/backend/data/
 uploads/
 *.log
 .tmp/
