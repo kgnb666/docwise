@@ -67,6 +67,7 @@ async def upload_document(
 
     # 3) 入库
     store = get_vector_store()
+    chunk_payloads = []
     for chunk, vec in zip(chunks, vectors):
         store.add(
             chunk.id,
@@ -78,9 +79,13 @@ async def upload_document(
                 "text": chunk.text,
             },
         )
+        chunk_payloads.append({"index": chunk.index, "text": chunk.text, "vector": vec})
 
-    # 4) 注册文档
+    # 4) 注册文档 + 落盘持久化（重启自动恢复）
     doc_store.create(doc_id=doc_id, name=name, chunk_count=len(chunks))
+    from app.storage.persistence import save_document
+
+    save_document(doc_id, name, chunk_payloads)
     log_event("upload", name=name, chunk_count=len(chunks))
     return {"doc_id": doc_id, "name": name, "chunk_count": len(chunks)}
 
@@ -127,4 +132,7 @@ async def delete_document(doc_id: str) -> dict:
     if not doc_store.delete(doc_id):
         raise HTTPException(status_code=404, detail="文档不存在")
     removed = store.delete_by_doc(doc_id)
+    from app.storage.persistence import delete_document_file
+
+    delete_document_file(doc_id)  # 同步删除磁盘快照
     return {"doc_id": doc_id, "removed_chunks": removed}

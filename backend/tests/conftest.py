@@ -8,10 +8,13 @@ pydantic-settings 的优先级：环境变量 > .env 文件，因此这里设置
 """
 
 import os
+import tempfile
 
 os.environ["OPENAI_API_KEY"] = ""
 os.environ["EMBEDDING_API_KEY"] = ""
 os.environ["EMBEDDING_PROVIDER"] = "hash"
+# 数据目录隔离：测试不写真实 data/（持久化快照落到临时目录）
+os.environ["DATA_DIR"] = tempfile.mkdtemp(prefix="docwise-test-")
 
 import pytest
 
