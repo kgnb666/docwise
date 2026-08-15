@@ -1,5 +1,7 @@
 # DocWise — 智能知识库问答与 Agent 助手平台
 
+![CI](https://github.com/kgnb666/docwise/actions/workflows/ci.yml/badge.svg)
+
 > 把任意文档变成「可对话、可溯源、能执行任务」的 AI 助手。
 > 本项目是求职用作品：**全链路 RAG（文档解析 → 智能分块 → 混合检索 → Rerank → 流式回答）+ 可量化评测（RAGAS）+ 工具调用 Agent**，并配以完整的工程化（测试 / CI / Docker / 可观测性）。
 
