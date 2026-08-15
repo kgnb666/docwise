@@ -169,8 +169,8 @@ export default function App() {
 
         <div className="sidebar-actions">
           <label className="upload-btn">
-            📤 上传文档（txt / md / pdf）
-            <input type="file" accept=".txt,.md,.markdown,.pdf" hidden onChange={handleUpload} />
+            📤 上传文档（txt / md / pdf / docx）
+            <input type="file" accept=".txt,.md,.markdown,.pdf,.docx" hidden onChange={handleUpload} />
           </label>
           <button className="clear-btn" onClick={() => setMessages([])} title="清空对话">
             🗑 清空
