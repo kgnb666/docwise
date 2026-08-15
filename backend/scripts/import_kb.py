@@ -18,13 +18,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from app.core.docx_utils import extract_docx_text
 from app.core.pdf_utils import extract_pdf_text
 from app.deps import get_embedder
 from app.rag.chunker import make_chunks, new_doc_id
 from app.storage.document_store import get_document_store
 from app.storage.vector_store import get_vector_store
 
-SUPPORTED = {".md", ".markdown", ".txt", ".pdf"}
+SUPPORTED = {".md", ".markdown", ".txt", ".pdf", ".docx"}
 
 
 def collect_files(paths: list[str]) -> list[Path]:
@@ -49,6 +50,8 @@ def read_text(path: Path) -> str:
     """按扩展名读取纯文本（复用与上传接口一致的解析逻辑）。"""
     if path.suffix.lower() == ".pdf":
         return extract_pdf_text(path.read_bytes())
+    if path.suffix.lower() == ".docx":
+        return extract_docx_text(path.read_bytes())
     return path.read_text(encoding="utf-8", errors="ignore")
 
 

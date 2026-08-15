@@ -1,6 +1,6 @@
 """文档接口：上传 / 列表 / 删除 / 统计。
 
-上传流程：解析文本（txt/md/pdf）→ 分块 → 批量向量化 → 入库 → 注册文档元信息。
+上传流程：解析文本（txt/md/pdf/docx）→ 分块 → 批量向量化 → 入库 → 注册文档元信息。
 """
 
 from __future__ import annotations
@@ -9,6 +9,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
+from app.core.docx_utils import extract_docx_text
 from app.core.observability import log_event
 from app.core.pdf_utils import extract_pdf_text
 from app.deps import get_embedder
@@ -19,8 +20,8 @@ from app.storage.vector_store import get_vector_store
 
 router = APIRouter()
 
-# 支持纯文本 / Markdown / PDF；PDF 走 pypdf 提取文本
-ALLOWED_EXTS = {".txt", ".md", ".markdown", ".pdf"}
+# 支持 txt / md / pdf / docx（老式 .doc 需先用 Word 另存为 .docx）
+ALLOWED_EXTS = {".txt", ".md", ".markdown", ".pdf", ".docx"}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
 
@@ -28,6 +29,8 @@ def _read_text(ext: str, raw: bytes) -> str:
     """按扩展名解析文件为纯文本。"""
     if ext == ".pdf":
         return extract_pdf_text(raw)
+    if ext == ".docx":
+        return extract_docx_text(raw)
     return raw.decode("utf-8", errors="ignore")
 
 
