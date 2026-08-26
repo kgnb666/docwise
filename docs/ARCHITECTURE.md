@@ -29,7 +29,7 @@ flowchart LR
 
 | 模块 | 职责 | 关键设计点 |
 |---|---|---|
-| `app/api/routes/documents.py` | 文档上传 / 列表 / 删除 | 上传 → 解析（txt/md/pdf）→ 分块 → 嵌入 → 入库，全程异步 |
+| `app/api/routes/documents.py` | 文档上传 / 列表 / 删除 | 上传 → 解析（txt/md/pdf/docx）→ 分块 → 嵌入 → 入库，全程异步 |
 | `app/rag/chunker.py` | 文档分块 | 标题感知分段 + 固定窗口重叠，中文按段落粒度优先 |
 | `app/rag/embedder.py` | 文本向量化 | OpenAI 兼容 `/embeddings`；`embedder_hash.py` 提供离线哈希实现（可插拔） |
 | `app/rag/retriever.py` | 混合检索 | BM25（关键词）+ 向量（语义）加权融合 → Rerank 精排 |

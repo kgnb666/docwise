@@ -1,7 +1,7 @@
 # 简历条目（写实版，直接可用）
 
 > 原则：只写真实存在的能力；需要真实数据的地方标注 [待补]，拿到 Key 后填上。
-> 数字比形容词有说服力：70 个测试、20 篇语料、52 条测试集、5 轮工具上限、20QPM 限流……
+> 数字比形容词有说服力：81 个测试、20 篇语料、52 条测试集、5 轮工具上限、20QPM 限流……
 
 ## 中文版
 
@@ -11,7 +11,7 @@
 - 自建 52 条 QA 测试集（20 篇面试知识语料）与评测体系：四档检索配置（纯向量/混合/混合+OverlapRerank/混合+bge-reranker API）命中率对比 + **LLM-as-Judge 生成质量打分**（忠实度/相关性），每次优化用数据验证，报告可复现（docs/eval/）；
 - 实现 **Agent 工具闭环**：Function Calling 循环 + 工具注册框架（计算器/维基百科联网搜索），max_turns 防死循环，前端展示调用记录；
 - 追问改写（指代词检测自动补全上文）、jieba 中文分词（可插拔）、检索结果 TTL 缓存、按 IP 令牌桶限流、JSON 结构化日志；
-- 工程化：**70 个 pytest 用例全离线可跑**、Ruff 静态检查、GitHub Actions CI（lint+test+build）、Docker Compose 生产部署（nginx 反代 + SSE 关缓冲）；
+- 工程化：**81 个 pytest 用例全离线可跑**、Ruff 静态检查、GitHub Actions CI（lint+test+build）、Docker Compose 生产部署（nginx 反代 + SSE 关缓冲）；
 - 前端 React + TypeScript：流式对话、Markdown 渲染、引用/工具调用/改写可视化、会话持久化、文档分块查看。
 
 ## English Version
@@ -22,7 +22,7 @@
 - Curated a 52-question test set (20 interview-note corpus) and an evaluation framework: 4-mode retrieval hit-rate comparison (top-1: pure-vector 96.2% → hybrid 98.1%) + LLM-as-Judge faithfulness/relevance scoring, with reproducible reports (docs/eval/);
 - Implemented a Function-Calling agent loop with a tool registry (calculator / Wikipedia search), call-limit guard, and a frontend tool-call trace;
 - Follow-up query rewriting (pronoun-aware), pluggable jieba tokenization, TTL retrieval cache, per-IP token-bucket rate limiting, structured JSON logging;
-- Engineering: 70 offline-runnable pytest cases, Ruff linting, GitHub Actions CI (lint+test+build), Docker Compose production deployment (nginx reverse proxy with SSE buffering disabled);
+- Engineering: 81 offline-runnable pytest cases, Ruff linting, GitHub Actions CI (lint+test+build), Docker Compose production deployment (nginx reverse proxy with SSE buffering disabled);
 - Frontend: React + TypeScript with streaming chat, Markdown rendering, citation/tool/rewrite visualization, session persistence, chunk viewer.
 
 ## 真实评测数据（2026-08 实测，写进简历时合并到项目条目）
@@ -40,4 +40,4 @@
 自研 BM25 混合检索、Rerank、追问改写、工具调用闭环都有实现；更关键的是我搭了评测体系——
 52 题测试集 + 四档命中率对比 + LLM 判分，每次优化都有数据证明。实测 top-1 检索从纯向量
 96.2% 提升到混合检索 98.1%，评测还帮我抓出过引用截断误判和跨主题漏检两个真实 bug。
-整个项目 70 个测试全离线可跑，有 CI、Docker 部署，代码都在 GitHub。」
+整个项目 81 个测试全离线可跑，有 CI、Docker 部署，代码都在 GitHub。」

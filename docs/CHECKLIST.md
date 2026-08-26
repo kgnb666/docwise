@@ -5,12 +5,12 @@
 
 ## ✅ 代码与质量（已完成，可复跑验证）
 
-- [x] 一键全量验证：`powershell -ExecutionPolicy Bypass -File scripts/run_all.ps1`（ruff → 70 测试 → 真实评测 → 基准 → SUMMARY.md）
+- [x] 一键全量验证：`powershell -ExecutionPolicy Bypass -File scripts/run_all.ps1`（ruff → 81 测试 → 真实评测 → 基准 → SUMMARY.md）
 - [x] 后端启动正常：`cd backend && .\.venv\Scripts\uvicorn app.main:app --reload --port 8000`
 - [x] 前端启动正常：`cd frontend && npm run dev` → http://localhost:5173
-- [x] 单元测试全绿：`cd backend && python -m pytest -q`（70 个）
+- [x] 单元测试全绿：`cd backend && python -m pytest -q`（81 个）
 - [x] 静态检查零告警：`ruff check app tests scripts`
-- [x] 真实评测数据已生成：`docs/eval/offline_report.json`（top-1 四档对比）、`quality_report.json`（32 题）、`benchmark.json`（延迟/成本）、`SUMMARY.md`（汇总页）
+- [x] 真实评测数据已生成：`docs/eval/offline_report.json`（top-1 四档对比）、`quality_report.json`（52 题）、`benchmark.json`（延迟/成本）、`SUMMARY.md`（汇总页）
 
 ## 📚 真实知识库（关键，待你提供内容）
 

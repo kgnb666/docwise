@@ -14,7 +14,7 @@
 
 ## 阶段 1：MVP 跑通（第 2~4 周）
 
-- [x] 文档上传接口：txt / md / **pdf**（pypdf 提取文本，空内容/扫描件有明确报错）
+- [x] 文档上传接口：txt / md / **pdf** / **docx**（pypdf 提取 pdf，python-docx 提取 docx，空内容/扫描件有明确报错）
 - [x] 分块器：标题感知 + 重叠窗口，能正确处理中文
 - [x] 嵌入服务：OpenAI 兼容接口 + **离线哈希嵌入（EMBEDDING_PROVIDER=hash，无需 Key 可跑通全链路）**
 - [x] 向量存储：内存实现（接口先行，为替换留口子）

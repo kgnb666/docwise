@@ -13,23 +13,23 @@
 | 原始要求 | 达成情况 |
 |---|---|
 | AI/大模型应用 | ✅ RAG 全链路 + Agent Function Calling + LLM-as-Judge |
-| 后端 | ✅ FastAPI 异步 + SSE 流式 + 70 个单元测试 + Ruff 0 告警 |
+| 后端 | ✅ FastAPI 异步 + SSE 流式 + 81 个单元测试 + Ruff 0 告警 |
 | 前端 | ✅ React + TS：流式对话 / Markdown / 引用溯源 / 工具与改写可视化 |
 | 可部署 | ✅ 生产 nginx + 两阶段镜像 + docker-compose + DEPLOYMENT 指南 |
-| 可演示 | ✅ 内置 10 篇面试知识库 + import_kb 一键导入 + DEMO 分镜脚本 |
+| 可演示 | ✅ 内置 20 篇面试知识库 + import_kb 一键导入 + DEMO 分镜脚本 |
 | 可量化效果 | ✅ 真实评测数据（见下）+ 评测体系抓到 2 个真实 bug |
 | 简历条目 / 面试话术 | ✅ RESUME 写实版 + INTERVIEW 24 问 + 30 秒电梯演讲 |
 
 ## 三、真实评测数据（2026-08 实测，全部可复现）
 
 ```
-检索命中率（top-1，32 题，bge-m3 真实嵌入）
-  纯向量检索            96.9%  ← 漏 1 题（Transformer 跨主题）
-  混合检索             100.0%  ← BM25 关键词纠偏
-  混合+OverlapRerank   100.0%
-  混合+bge-reranker(API) 100.0%
+检索命中率（top-1，52 题，bge-m3 真实嵌入）
+  纯向量检索            96.2%  ← 漏 2 题（Transformer 跨主题 / 动态规划）
+  混合检索             98.1%  ← BM25 关键词纠偏
+  混合+OverlapRerank   98.1%
+  混合+bge-reranker(API) 98.1%
 
-生成质量（32 题，DeepSeek 判分）
+生成质量（52 题，DeepSeek 判分）
   引用命中 100% · 忠实度 0.99 · 相关性 0.95
 
 基准
@@ -47,7 +47,7 @@
 ## 五、技术栈与规模
 
 - 后端 Python/FastAPI；LLM DeepSeek；嵌入 bge-m3（硅基流动）；Rerank bge-reranker（API）
-- 70 个单元测试（全离线、不耗 Key）、Ruff 0 告警、GitHub Actions CI 配置
+- 81 个单元测试（全离线、不耗 Key）、Ruff 0 告警、GitHub Actions CI 配置
 - 检索缓存 / 令牌桶限流 / JSON 结构化日志 / 追问改写 / jieba 分词 / 双 API 配置
 
 ## 六、架构演进留白（面试"如果重做"题）
