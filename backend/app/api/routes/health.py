@@ -16,7 +16,7 @@ async def health() -> dict:
     return {
         "status": "ok",
         "app": settings.app_name,
-        "version": "0.1.0",
+        "version": settings.app_version,
         "stats": {
             "documents": get_document_store().count(),
             "chunks": get_vector_store().count(),

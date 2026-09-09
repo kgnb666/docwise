@@ -16,6 +16,7 @@ export async function streamChat(
   query: string,
   history: ChatMessage[],
   handlers: StreamHandlers,
+  signal?: AbortSignal,
 ): Promise<void> {
   let resp: Response
   try {
@@ -26,8 +27,13 @@ export async function streamChat(
         query,
         history: history.map((m) => ({ role: m.role, content: m.content })),
       }),
+      signal,
     })
-  } catch {
+  } catch (err) {
+    if ((err as Error)?.name === 'AbortError' || signal?.aborted) {
+      handlers.onDone?.()
+      return
+    }
     handlers.onError?.('无法连接后端服务，请确认后端已启动（uvicorn）')
     return
   }
@@ -73,20 +79,28 @@ export async function streamChat(
     }
   }
 
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    buffer += decoder.decode(value, { stream: true })
-    // SSE 消息以空行分隔，逐条处理
-    const parts = buffer.split('\n\n')
-    buffer = parts.pop() ?? ''
-    for (const part of parts) {
-      const line = part.trim()
-      if (!line.startsWith('data:')) continue
-      handleEvent(line.slice(5).trim())
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+      // SSE 消息以空行分隔，逐条处理
+      const parts = buffer.split('\n\n')
+      buffer = parts.pop() ?? ''
+      for (const part of parts) {
+        const line = part.trim()
+        if (!line.startsWith('data:')) continue
+        handleEvent(line.slice(5).trim())
+      }
     }
+    handlers.onDone?.()
+  } catch (err) {
+    if ((err as Error)?.name === 'AbortError' || signal?.aborted) {
+      handlers.onDone?.()
+      return
+    }
+    handlers.onError?.('流式读取中断或网络异常')
   }
-  handlers.onDone?.()
 }
 
 export async function fetchDocs(): Promise<DocInfo[]> {
@@ -129,7 +143,11 @@ export async function uploadDoc(file: File): Promise<DocInfo> {
 }
 
 export async function deleteDoc(docId: string): Promise<void> {
-  await fetch(`/api/documents/${docId}`, { method: 'DELETE' })
+  const resp = await fetch(`/api/documents/${docId}`, { method: 'DELETE' })
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => null)
+    throw new Error(err?.detail ?? `删除失败：HTTP ${resp.status}`)
+  }
 }
 
 export interface DocChunk {

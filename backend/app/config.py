@@ -16,6 +16,7 @@ class Settings(BaseSettings):
 
     # 服务
     app_name: str = "DocWise"
+    app_version: str = "0.2.0"
     host: str = "0.0.0.0"
     port: int = 8000
     # 持久化数据目录（文档快照；可被 DATA_DIR 环境变量覆盖，测试隔离用）
@@ -32,6 +33,8 @@ class Settings(BaseSettings):
     embedding_api_key: str = ""
     # 嵌入实现：openai（真实接口）| hash（离线哈希，无需 Key，供测试/CI/原型）
     embedding_provider: str = "openai"
+    # 单次向云端 /embeddings 接口批量发送的最大分块数（防 400/413 报错）
+    embedding_batch_size: int = 32
     temperature: float = 0.2
     max_tokens: int = 1024
 
@@ -42,9 +45,16 @@ class Settings(BaseSettings):
     chunk_overlap: int = 100
     # 混合检索权重：0~1，越大越偏向关键词（BM25）
     hybrid_alpha: float = 0.4
-    # Rerank：null（不重排）| overlap（轻量重叠精排，MVP）
+    # Rerank：null（不重排）| overlap（轻量重叠精排，MVP，默认离线）| api（云端 bge-reranker）
     reranker: str = "overlap"
     rerank_alpha: float = 0.3
+    # Rerank API 可独立配置（例如硅基流动 /v1）；留空则依次回退 embedding_base_url/embedding_api_key、
+    # 再回退 openai_base_url/openai_api_key（参考 embedder 的写法）
+    rerank_base_url: str = ""
+    rerank_api_key: str = ""
+    rerank_model: str = "BAAI/bge-reranker-v2-m3"
+    # 云端 rerank 一次精排的候选数（应 >= rerank_top_k；最终仍按 rerank_top_k 截断返回）
+    rerank_top_n: int = 3
     # 相关度阈值：低于该分数的检索结果视为"未命中"（触发兜底）。
     # 真实嵌入（bge-m3）下相关块 ≈ 0.7、无关 ≈ 0.1，取 0.3；离线哈希嵌入请保持 0.0
     score_threshold: float = 0.0

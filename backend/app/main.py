@@ -31,13 +31,16 @@ async def lifespan(_app: FastAPI):
     if restored:
         log_event("restore", documents=restored)
     yield
+    from app.deps import close_http_client
+
+    await close_http_client()
 
 
 def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.app_name,
         description="智能知识库问答与 Agent 助手平台（RAG 全链路）",
-        version="0.2.0",
+        version=settings.app_version,
         lifespan=lifespan,
     )
 

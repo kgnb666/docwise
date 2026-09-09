@@ -92,9 +92,31 @@ def test_retrieval_finds_expected_doc_after_upload():
     retriever = Retriever(get_vector_store(), top_k=5, rerank_top_k=3, alpha=0.4)
 
     qv = asyncio.run(embedder.embed(["Dockerfile 中 CMD 指令的作用"]))[0]
-    results = retriever.retrieve("Dockerfile 中 CMD 指令的作用", qv)
+    results = asyncio.run(retriever.retrieve("Dockerfile 中 CMD 指令的作用", qv))
     assert results[0].doc_name == "docker-notes.md"
 
     qv2 = asyncio.run(embedder.embed(["什么是 RAG 检索增强生成"]))[0]
-    results2 = retriever.retrieve("什么是 RAG 检索增强生成", qv2)
+    results2 = asyncio.run(retriever.retrieve("什么是 RAG 检索增强生成", qv2))
     assert results2[0].doc_name == "rag-notes.md"
+
+
+def test_cache_cleared_on_upload_and_delete():
+    """验证文档上传和删除时会清空检索缓存。"""
+    from app.deps import get_cache
+
+    client = TestClient(app)
+    cache = get_cache()
+    if cache is not None:
+        cache.set("test_key", "test_val")
+        assert cache.get("test_key") == "test_val"
+
+        # 上传应清空缓存
+        data = _upload(client, "test-cache.md", "# Test Cache\nSome cache test content", "text/markdown")
+        assert cache.get("test_key") is None
+
+        # 再次写入缓存，删除应清空缓存
+        cache.set("test_key2", "test_val2")
+        doc_id = data["doc_id"]
+        del_resp = client.delete(f"/api/documents/{doc_id}")
+        assert del_resp.status_code == 200
+        assert cache.get("test_key2") is None

@@ -6,11 +6,12 @@
 - 两者分数归一化后加权融合，能同时吃到两边的优势。
 
 Rerank：先粗召回 top_k 个候选，再用更强的模型精排取 rerank_top_k 个。
-MVP 阶段 Rerank 为恒等排序（占位），阶段 2 接入 bge-reranker。
+实现按配置切换：null（不重排）/ overlap（轻量重叠，离线零依赖）/ api（云端 bge-reranker）。
 """
 
 from __future__ import annotations
 
+import inspect
 import math
 from dataclasses import dataclass
 
@@ -117,19 +118,11 @@ class Retriever:
         return self._bm25
 
     def _all_items(self) -> list[dict]:
-        # 内存实现直接全量取；换数据库后这里改成 SELECT 全部
-        # 说明：MVP 数据集小，全量扫描可接受；阶段 2 换 FAISS 后向量检索走 ANN。
-        store = self.store
-        if hasattr(store, "_items"):
-            with store._lock:
-                return [
-                    {"id": k, "metadata": v.metadata, "vector": v.vector}
-                    for k, v in store._items.items()
-                ]
-        raise NotImplementedError("Retriever 目前只支持 InMemoryVectorStore")
+        # 面向 VectorStore 抽象接口编程，不再访问具体实现的私有属性
+        return self.store.get_all_documents()
 
     # ---------- 检索主流程 ----------
-    def retrieve(self, query: str, query_vector: list[float]) -> list[RetrievedChunk]:
+    async def retrieve(self, query: str, query_vector: list[float]) -> list[RetrievedChunk]:
         items = self._all_items()
         if not items:
             return []
@@ -167,8 +160,12 @@ class Retriever:
             for i in order
         ]
 
-        # 5) Rerank 精排：对粗召回候选重新排序（Null=不重排 / Overlap=轻量重排 / 后续可换 bge-reranker）
-        candidates = self.reranker.rerank(query, candidates)
+        # 5) Rerank 精排：对粗召回候选重新排序。
+        #    离线实现（Null/Overlap）为同步；云端 APIReranker 为 async，统一按 awaitable 兼容。
+        reranked = self.reranker.rerank(query, candidates)
+        if inspect.isawaitable(reranked):
+            reranked = await reranked
+        candidates = reranked
 
         # 6) 相关度阈值过滤：低于视为"未命中"（触发知识库外兜底）。
         #    注意：必须用原始向量相似度（score_vector，未 min-max 归一化）——

@@ -1,0 +1,12 @@
+{
+  "server": "YOUR_SERVER_IP",
+  "user": "root",
+  "sshKey": "C:/Users/<你的用户名>/.ssh/id_rsa",
+  "serverDir": "/root/docwise",
+  "port": 8080,
+  "healthPath": "/api/health",
+  "composeFile": "docker-compose.yml",
+  "backendContainer": "docwise-backend",
+  "projectDir": "",
+  "extraExcludes": []
+}

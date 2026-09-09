@@ -14,7 +14,7 @@
 | 🧠 知识库外问题兜底 | 双模式：strict（只答知识库，防幻觉）/ chat（未命中时用常识回答或联网查证），靠相关度阈值自动分流（实测 0.4 分开无关/相关） |
 | 📊 有评测、有数据 | 52 条测试集 + 20 篇语料：top-1 检索 **纯向量 96.2% → 混合检索 98.1%**（真实 embedding），生成质量 LLM-as-Judge 忠实度 **0.99**/相关性 **0.95**（DeepSeek 实测）；评测抓到过"引用截断误判"和"Transformer 跨主题漏检"等真实案例 |
 | 🛠 Agent 工具调用 | Function Calling 循环 + 工具注册框架（计算器 / 维基百科搜索），max_turns 防死循环，前端展示调用记录 |
-| 🏗 工程化完整 | 81 个单元测试、Ruff 静态检查、检索缓存（跳过重复 embedding）、令牌桶限流、JSON 结构化日志、GitHub Actions CI、Docker 部署 |
+| 🏗 工程化完整 | 99 后端 + 8 前端单元测试、Ruff/ESLint 静态检查、检索缓存（跳过重复 embedding）、令牌桶限流、Prompt 注入防护、JSON 结构化日志、GitHub Actions CI、Docker 部署 |
 | 🖥 全栈可演示 | React 前端流式对话 + Markdown 渲染 + 引用/工具/改写可视化 + 文档分块查看，部署上线有在线 Demo |
 
 ## 📈 实测数据（真实 API，2026-08）

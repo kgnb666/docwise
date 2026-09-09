@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
+import httpx
 from fastapi import Depends
 
 from app.config import get_settings
@@ -16,7 +17,7 @@ from app.core.rate_limit import RateLimiter
 from app.rag.embedder import Embedder
 from app.rag.embedder_hash import HashEmbedder
 from app.rag.pipeline import RagPipeline
-from app.rag.reranker import NullReranker, OverlapReranker
+from app.rag.reranker import APIReranker, NullReranker, OverlapReranker
 from app.rag.retriever import Retriever
 from app.storage.vector_store import get_vector_store
 
@@ -29,6 +30,31 @@ class EmbedderLike(Protocol):
     async def embed(self, texts: list[str]) -> list[list[float]]: ...
 
 
+_http_client: httpx.AsyncClient | None = None
+
+
+def get_http_client() -> httpx.AsyncClient:
+    """进程级共享 HTTP 异步客户端，复用连接池（Keep-Alive）。"""
+    global _http_client
+    if _http_client is None or _http_client.is_closed:
+        _http_client = httpx.AsyncClient(timeout=120)
+    return _http_client
+
+
+async def close_http_client() -> None:
+    """优雅关闭共享 HTTP 客户端连接池。"""
+    global _http_client
+    if _http_client is not None and not _http_client.is_closed:
+        await _http_client.aclose()
+    _http_client = None
+
+
+def reset_http_client() -> None:
+    """测试用：重置单例。"""
+    global _http_client
+    _http_client = None
+
+
 def get_embedder() -> EmbedderLike:
     if _settings.embedding_provider == "hash":
         return HashEmbedder()
@@ -36,12 +62,21 @@ def get_embedder() -> EmbedderLike:
         base_url=_settings.embedding_base_url or _settings.openai_base_url,
         api_key=_settings.embedding_api_key or _settings.openai_api_key,
         model=_settings.embedding_model,
+        batch_size=_settings.embedding_batch_size,
+        client=get_http_client(),
     )
 
 
 def get_reranker():
     if _settings.reranker == "overlap":
         return OverlapReranker(alpha=_settings.rerank_alpha)
+    if _settings.reranker == "api":
+        return APIReranker(
+            base_url=_settings.rerank_base_url or _settings.embedding_base_url or _settings.openai_base_url,
+            api_key=_settings.rerank_api_key or _settings.embedding_api_key or _settings.openai_api_key,
+            model=_settings.rerank_model,
+            top_n=_settings.rerank_top_n,
+        )
     return NullReranker()
 
 
@@ -56,11 +91,23 @@ def get_retriever() -> Retriever:
     )
 
 
+_cache: Cache | None = None
+
+
 def get_cache() -> Cache | None:
-    """检索缓存：开启时返回 TTL 缓存（后续换 Redis 实现，接口不变）。"""
+    """检索缓存：单例，开启时返回 TTL 缓存（后续换 Redis 实现，接口不变）。"""
+    global _cache
     if not _settings.retrieval_cache_enabled:
         return None
-    return InMemoryTTLCache(ttl=_settings.retrieval_cache_ttl)
+    if _cache is None:
+        _cache = InMemoryTTLCache(ttl=_settings.retrieval_cache_ttl)
+    return _cache
+
+
+def reset_cache() -> None:
+    """测试用：重置缓存单例。"""
+    global _cache
+    _cache = None
 
 
 _rate_limiter: RateLimiter | None = None
@@ -83,4 +130,5 @@ def get_pipeline(embedder: EmbedderLike = Depends(get_embedder)) -> RagPipeline:
         retriever=get_retriever(),
         settings=_settings,
         retrieval_cache=get_cache(),
+        http_client=get_http_client(),
     )

@@ -52,6 +52,10 @@ class VectorStore:
     def clear(self) -> None:
         raise NotImplementedError
 
+    def get_all_documents(self) -> list[dict]:
+        """返回全量向量记录列表，格式为 [{'id': ..., 'vector': ..., 'metadata': ...}]。"""
+        raise NotImplementedError
+
     @property
     def revision(self) -> int:
         """内容版本号：每次增删 +1，供检索器判断是否需要重建索引。"""
@@ -113,6 +117,14 @@ class InMemoryVectorStore(VectorStore):
         with self._lock:
             self._items.clear()
             self._revision += 1
+
+    def get_all_documents(self) -> list[dict]:
+        """返回全量向量记录列表，线程安全拷贝。"""
+        with self._lock:
+            return [
+                {"id": k, "metadata": dict(v.metadata), "vector": list(v.vector)}
+                for k, v in self._items.items()
+            ]
 
     @property
     def revision(self) -> int:

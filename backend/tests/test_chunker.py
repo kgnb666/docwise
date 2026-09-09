@@ -43,3 +43,52 @@ def test_tokenize_english_lowercase():
     tokens = tokenize("Hello World Hello")
     assert tokens.count("hello") == 2
     assert "world" in tokens
+
+
+def test_markdown_heading_aware_chunking_inheritance():
+    doc = """# 核心设计
+这是核心设计的介绍。
+
+## 混合检索
+混合检索结合了 BM25 和向量。
+
+### Rerank 精排
+重排是精细打分。
+
+## 向量存储
+存储采用内存实现。
+"""
+    chunks = make_chunks(doc, doc_id="doc-1", doc_name="arch.md")
+    assert len(chunks) == 4
+
+    assert chunks[0].text.startswith("[核心设计]\n")
+    assert chunks[0].metadata["heading_path"] == "核心设计"
+    assert chunks[0].metadata["headings"] == ["核心设计"]
+
+    assert chunks[1].text.startswith("[核心设计 > 混合检索]\n")
+    assert chunks[1].metadata["heading_path"] == "核心设计 > 混合检索"
+
+    assert chunks[2].text.startswith("[核心设计 > 混合检索 > Rerank 精排]\n")
+    assert chunks[2].metadata["heading_path"] == "核心设计 > 混合检索 > Rerank 精排"
+
+    assert chunks[3].text.startswith("[核心设计 > 向量存储]\n")
+    assert chunks[3].metadata["heading_path"] == "核心设计 > 向量存储"
+
+
+def test_markdown_heading_ignores_code_block_comments():
+    doc = """# 代码演示
+下面是一段代码：
+
+```python
+# 这只是代码注释，绝不是标题
+x = 1
+```
+
+这是代码后的总结。
+"""
+    chunks = make_chunks(doc, doc_id="doc-2", doc_name="code.md")
+    assert len(chunks) == 1
+    assert chunks[0].metadata["heading_path"] == "代码演示"
+    assert "这只是代码注释" in chunks[0].text
+    assert "# 这只是代码注释" not in chunks[0].metadata["heading_path"]
+

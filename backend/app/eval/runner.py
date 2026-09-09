@@ -11,9 +11,11 @@
 from __future__ import annotations
 
 import asyncio
+import time
 from dataclasses import dataclass, field
 from typing import Protocol
 
+from app.core.observability import log_event, new_query_id, truncate
 from app.eval.judge import LLMJudge
 
 
@@ -41,6 +43,8 @@ class QualityEvaluator:
 
     async def evaluate_one(self, item: dict) -> ItemResult:
         """对单条测试数据：系统作答 → 判分。"""
+        query_id = new_query_id()
+        t0 = time.perf_counter()
         question = item["question"]
         expected = item["expected_doc"]
 
@@ -64,6 +68,16 @@ class QualityEvaluator:
             item_result.faithfulness_reason = fs_reason
             item_result.relevance = ar
             item_result.relevance_reason = ar_reason
+        log_event(
+            "eval_item",
+            query_id=query_id,
+            question=truncate(question),
+            expected_doc=expected,
+            hit=item_result.hit,
+            faithfulness=item_result.faithfulness,
+            relevance=item_result.relevance,
+            latency_ms=round((time.perf_counter() - t0) * 1000, 1),
+        )
         return item_result
 
     async def run(self, test_set: list[dict]) -> dict:

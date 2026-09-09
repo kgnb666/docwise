@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import time
+import uuid
 from pathlib import Path
 
 
@@ -52,3 +53,14 @@ def log_event(topic: str, **fields) -> None:
     logging.getLogger("docwise").info(
         "event", extra={"event": topic, "fields": fields}
     )
+
+
+def new_query_id() -> str:
+    """生成一次问答/评测的关联 ID（短 UUID），用于把检索、生成、结果各阶段日志串起来。"""
+    return uuid.uuid4().hex[:12]
+
+
+def truncate(text: str | None, limit: int = 200) -> str:
+    """日志用截断：避免写入完整 prompt / 大段文档内容，防止敏感信息落盘。"""
+    text = (text or "").strip()
+    return text if len(text) <= limit else text[:limit] + "…"

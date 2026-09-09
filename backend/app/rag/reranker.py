@@ -9,7 +9,7 @@
 - NullReranker：恒等排序（不启用时用）；
 - OverlapReranker：轻量重叠精排（离线、零依赖），作为 MVP 占位实现；
 - APIReranker：调用云上 rerank API（硅基流动 BAAI/bge-reranker-v2-m3），
-  免去本地装 torch，接口与本地实现一致（async，适合评测/离线路由）。
+  免去本地装 torch；async 实现，配合异步 Retriever 可直接接入运行时问答链路。
 """
 
 from __future__ import annotations
@@ -82,8 +82,8 @@ def parse_rerank_response(data: dict, candidates: list) -> list:
 class APIReranker:
     """调用云上 rerank API（OpenAI 兼容风格，硅基流动 /v1/rerank）。
 
-    注意：本实现是 async，适合评测脚本与离线批处理；
-    运行时接入需把 Retriever.retrieve 改为异步（见 docs/ROADMAP.md 演进项）。
+    注意：本实现是 async，Retriever.retrieve 已是 async 并会对 async reranker await；
+    配置 reranker=api 后，运行时问答自动走云端精排（离线环境请保持 overlap/null）。
     """
 
     def __init__(

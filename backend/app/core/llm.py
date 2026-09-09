@@ -20,12 +20,14 @@ class LLMClient:
         model: str,
         temperature: float = 0.2,
         max_tokens: int = 1024,
+        client: httpx.AsyncClient | None = None,
     ):
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.model = model
         self.temperature = temperature
         self.max_tokens = max_tokens
+        self._client = client
 
     async def complete(self, messages: list[dict]) -> str:
         """非流式补全：聚合流式结果为完整文本。
@@ -61,31 +63,37 @@ class LLMClient:
             payload["tools"] = tools
             payload["tool_choice"] = "auto"
 
-        async with httpx.AsyncClient(timeout=120) as client, client.stream(
-            "POST",
-            f"{self.base_url}/chat/completions",
-            headers={"Authorization": f"Bearer {self.api_key}"},
-            json=payload,
-        ) as resp:
-            resp.raise_for_status()
-            # 逐行解析 SSE：data: {...}
-            async for line in resp.aiter_lines():
-                line = line.strip()
-                if not line.startswith("data:"):
-                    continue
-                data = line[5:].strip()
-                if data == "[DONE]":
-                    break
-                try:
-                    obj = json.loads(data)
-                except ValueError:
-                    continue
-                choices = obj.get("choices") or []
-                if not choices:
-                    continue
-                delta = choices[0].get("delta") or {}
-                if delta.get("content"):
-                    yield {"type": "delta", "content": delta["content"]}
-                if delta.get("tool_calls"):
-                    for tc in delta["tool_calls"]:
-                        yield {"type": "tool_call", "tool_call": tc}
+        manage_client = self._client is None
+        client = self._client or httpx.AsyncClient(timeout=120)
+        try:
+            async with client.stream(
+                "POST",
+                f"{self.base_url}/chat/completions",
+                headers={"Authorization": f"Bearer {self.api_key}"},
+                json=payload,
+            ) as resp:
+                resp.raise_for_status()
+                # 逐行解析 SSE：data: {...}
+                async for line in resp.aiter_lines():
+                    line = line.strip()
+                    if not line.startswith("data:"):
+                        continue
+                    data = line[5:].strip()
+                    if data == "[DONE]":
+                        break
+                    try:
+                        obj = json.loads(data)
+                    except ValueError:
+                        continue
+                    choices = obj.get("choices") or []
+                    if not choices:
+                        continue
+                    delta = choices[0].get("delta") or {}
+                    if delta.get("content"):
+                        yield {"type": "delta", "content": delta["content"]}
+                    if delta.get("tool_calls"):
+                        for tc in delta["tool_calls"]:
+                            yield {"type": "tool_call", "tool_call": tc}
+        finally:
+            if manage_client:
+                await client.aclose()

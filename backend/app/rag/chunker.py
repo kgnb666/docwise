@@ -71,6 +71,55 @@ def split_text(text: str, chunk_size: int = 800, overlap: int = 100) -> list[str
     return chunks
 
 
+_HEADING_RE = re.compile(r"^(#{1,6})\s+(.+)$")
+
+
+def split_markdown_sections(text: str) -> list[tuple[list[str], str]]:
+    """解析 Markdown 文档各级标题，返回 [(heading_path, section_content), ...] 列表。
+
+    能够识别 ``` 和 ~~~ 代码块，避免代码注释中的 # 被误判为标题。
+    若文档没有标题，返回 [([], text)]。
+    """
+    lines = text.splitlines()
+    sections: list[tuple[list[str], str]] = []
+    stack: list[tuple[int, str]] = []
+    current_lines: list[str] = []
+    in_code_block = False
+    has_headings = False
+
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith(("```", "~~~")):
+            in_code_block = not in_code_block
+            current_lines.append(line)
+            continue
+
+        if not in_code_block:
+            m = _HEADING_RE.match(stripped)
+            if m:
+                has_headings = True
+                content = "\n".join(current_lines).strip()
+                if content:
+                    sections.append(([t for _, t in stack], content))
+                    current_lines = []
+                level = len(m.group(1))
+                title = m.group(2).strip()
+                while stack and stack[-1][0] >= level:
+                    stack.pop()
+                stack.append((level, title))
+                continue
+
+        current_lines.append(line)
+
+    content = "\n".join(current_lines).strip()
+    if content:
+        sections.append(([t for _, t in stack], content))
+
+    if not has_headings:
+        return [([], text)]
+    return sections
+
+
 def make_chunks(
     text: str,
     doc_id: str,
@@ -78,18 +127,38 @@ def make_chunks(
     chunk_size: int = 800,
     overlap: int = 100,
 ) -> list[Chunk]:
-    """把整篇文档切成带元信息的 Chunk 列表。"""
-    parts = split_text(text, chunk_size, overlap)
-    return [
-        Chunk(
-            id=f"{doc_id}:{i}",
-            text=p,
-            doc_id=doc_id,
-            doc_name=doc_name,
-            index=i,
-        )
-        for i, p in enumerate(parts)
-    ]
+    """把整篇文档切成带元信息的 Chunk 列表（支持 Markdown 标题感知切分与章节继承）。"""
+    if not text or not text.strip():
+        return []
+
+    sections = split_markdown_sections(text)
+    chunks: list[Chunk] = []
+    chunk_index = 0
+
+    for heading_path, section_text in sections:
+        prefix = f"[{' > '.join(heading_path)}]\n" if heading_path else ""
+        meta = {
+            "headings": list(heading_path),
+            "heading_path": " > ".join(heading_path),
+        }
+        # 扣除 prefix 所占字符数，确保最终块大小不超标
+        effective_chunk_size = max(50, chunk_size - len(prefix))
+        parts = split_text(section_text, chunk_size=effective_chunk_size, overlap=overlap)
+        for part in parts:
+            chunk_text = f"{prefix}{part}" if prefix else part
+            chunks.append(
+                Chunk(
+                    id=f"{doc_id}:{chunk_index}",
+                    text=chunk_text,
+                    doc_id=doc_id,
+                    doc_name=doc_name,
+                    index=chunk_index,
+                    metadata=dict(meta),
+                )
+            )
+            chunk_index += 1
+
+    return chunks
 
 
 def new_doc_id() -> str:

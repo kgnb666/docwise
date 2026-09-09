@@ -94,11 +94,20 @@ class AgentExecutor:
                 )
                 yield {"type": "tool_result", "name": rc["name"], "result": result[:_MAX_TOOL_RESULT_LOG]}
 
-        # 达到轮数上限仍未结束
+        # 达到轮数上限仍未结束：给模型发送最终总结指令，不再提供 tools
         yield {
             "type": "delta",
-            "content": "\n\n> ⚠️ 已达到工具调用次数上限，我将基于已有信息回答。",
+            "content": "\n\n> ⚠️ 已达到工具调用次数上限，我将基于已有信息回答。\n\n",
         }
+        messages.append(
+            {
+                "role": "user",
+                "content": "已达到工具调用上限，请立刻结合上述工具执行结果给出最终回答，不要再调用任何工具。",
+            }
+        )
+        async for event in self.llm.stream_chat(messages, tools=None):
+            if event["type"] == "delta":
+                yield {"type": "delta", "content": event["content"]}
 
     async def _invoke(self, name: str, arguments: str) -> str:
         tool = get_tool(name)

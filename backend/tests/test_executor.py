@@ -80,12 +80,22 @@ def test_unknown_tool_returns_error_to_llm():
 
 
 def test_max_turns_prevents_infinite_loop():
-    # 模型每次都请求调用工具 → 应在 max_turns 后强制结束
-    llm = FakeLLM([[_tool_call("calculator", '{"expression": "1"}')]])
+    # 模型达到 max_turns 后强制结束并请求最终总结
+    llm = FakeLLM(
+        [
+            [_tool_call("calculator", '{"expression": "1"}')],
+            [_tool_call("calculator", '{"expression": "2"}')],
+            [_tool_call("calculator", '{"expression": "3"}')],
+            [{"type": "delta", "content": "这是基于已有信息的最终回答。"}],
+        ]
+    )
     ex = AgentExecutor(llm, max_turns=3)
     events = _run(ex)
-    assert llm.calls == 3
-    assert any("次数上限" in e.get("content", "") for e in events if e["type"] == "delta")
+    # 3 轮工具调用 + 1 次最终总结调用
+    assert llm.calls == 4
+    deltas = [e.get("content", "") for e in events if e["type"] == "delta"]
+    assert any("次数上限" in d for d in deltas)
+    assert any("这是基于已有信息的最终回答" in d for d in deltas)
 
 
 def test_async_handler_is_awaited():

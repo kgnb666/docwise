@@ -10,23 +10,29 @@
 
 from __future__ import annotations
 
+import time
 from collections.abc import AsyncIterator
+
+import httpx
 
 from app.agent.executor import AgentExecutor
 from app.agent.tools import TOOL_REGISTRY
 from app.config import Settings
 from app.core.cache import Cache
 from app.core.llm import LLMClient
+from app.core.observability import log_event, truncate
+from app.core.prompt_boundary import UNTRUSTED_CONTENT_GUARD, mark_untrusted
 from app.rag.embedder import Embedder
 from app.rag.query_rewrite import rewrite_for_retrieval
 from app.rag.retriever import RetrievedChunk, Retriever
 
-_SYSTEM_PROMPT = """你是「DocWise」智能知识库助手，负责基于提供的资料回答问题。
+_SYSTEM_PROMPT = f"""你是「DocWise」智能知识库助手，负责基于提供的资料回答问题。
 
 规则：
 1. 只依据参考资料回答；资料中没有的信息，明确说"资料中没有相关内容"，绝不编造。
 2. 引用来源时用 [1]、[2] 标注，编号对应参考资料列表。
 3. 回答用中文，简洁、有条理，可用 Markdown。
+4. {UNTRUSTED_CONTENT_GUARD}
 """
 
 # 常识兜底模式（fallback_mode=chat）下的系统提示：
@@ -41,22 +47,28 @@ _FALLBACK_SYSTEM_PROMPT = """你是「DocWise」助手。用户的问题没有�
 
 
 def build_messages(
-    query: str, chunks: list[RetrievedChunk], history: list[dict]
+    query: str,
+    chunks: list[RetrievedChunk],
+    history: list[dict] | None = None,
+    max_history_turns: int = 6,
 ) -> list[dict]:
-    """组装 Prompt：参考资料 + 历史对话 + 当前问题。"""
+    """组装 Prompt：系统提示词 + 裁剪后的历史对话 + 参考资料与当前问题。"""
     refs = "\n\n".join(
-        f"[{i + 1}] 来源《{c.doc_name}》片段{c.index}：\n{c.text}"
+        f"[{i + 1}] 来源《{c.doc_name}》片段{c.index}：\n{mark_untrusted(c.text)}"
         for i, c in enumerate(chunks)
     )
-    user_content = (
-        f"参考资料：\n{refs}\n\n历史对话：\n{history}\n\n问题：{query}"
-        if history
-        else f"参考资料：\n{refs}\n\n问题：{query}"
-    )
-    return [
-        {"role": "system", "content": _SYSTEM_PROMPT},
-        {"role": "user", "content": user_content},
-    ]
+    messages: list[dict] = [{"role": "system", "content": _SYSTEM_PROMPT}]
+
+    # 规范化追加最近 N 轮历史消息，保留 role 与 content
+    if history:
+        for msg in history[-max_history_turns:]:
+            role = msg.get("role", "user")
+            content = str(msg.get("content", ""))
+            messages.append({"role": role, "content": content})
+
+    user_content = f"参考资料：\n{refs}\n\n问题：{query}" if refs else f"问题：{query}"
+    messages.append({"role": "user", "content": user_content})
+    return messages
 
 
 class RagPipeline:
@@ -67,6 +79,7 @@ class RagPipeline:
         settings: Settings,
         retrieval_cache: Cache | None = None,
         citation_preview_len: int = 200,
+        http_client: httpx.AsyncClient | None = None,
     ):
         self.embedder = embedder
         self.retriever = retriever
@@ -80,19 +93,45 @@ class RagPipeline:
             model=settings.llm_model,
             temperature=settings.temperature,
             max_tokens=settings.max_tokens,
+            client=http_client,
         )
         self.agent = AgentExecutor(self.llm, max_turns=settings.agent_max_turns)
 
-    async def _retrieve(self, query: str) -> list[RetrievedChunk]:
-        """检索（带缓存）：热点问题命中缓存后跳过 embedding 调用。"""
+    async def _retrieve(
+        self, query: str, query_id: str | None = None
+    ) -> list[RetrievedChunk]:
+        """检索（带缓存）：热点问题命中缓存后跳过 embedding 调用。
+
+        无论命中缓存还是真实检索，都记录结构化日志（query_id / 命中数 / 耗时），
+        便于把一次问答的检索阶段与整体链路串起来排查。
+        """
+        t0 = time.perf_counter()
+        cache_hit = False
         if self.retrieval_cache is not None:
             hit = self.retrieval_cache.get(query)
             if hit is not None:
-                return hit
-        vectors = await self.embedder.embed([query])
-        chunks = self.retriever.retrieve(query, vectors[0])
-        if self.retrieval_cache is not None and chunks:
-            self.retrieval_cache.set(query, chunks)
+                cache_hit = True
+                chunks = hit
+            else:
+                chunks = None
+        else:
+            chunks = None
+
+        if chunks is None:
+            vectors = await self.embedder.embed([query])
+            chunks = await self.retriever.retrieve(query, vectors[0])
+            if self.retrieval_cache is not None and chunks:
+                self.retrieval_cache.set(query, chunks)
+
+        log_event(
+            "retrieval",
+            query_id=query_id,
+            query=truncate(query),
+            hit_count=len(chunks),
+            top_score=round(chunks[0].score, 4) if chunks else None,
+            latency_ms=round((time.perf_counter() - t0) * 1000, 1),
+            cache_hit=cache_hit,
+        )
         return chunks
 
     def _citations(self, chunks: list[RetrievedChunk]) -> list[dict]:
@@ -109,7 +148,10 @@ class RagPipeline:
         ]
 
     async def stream_answer(
-        self, query: str, history: list[dict] | None = None
+        self,
+        query: str,
+        history: list[dict] | None = None,
+        query_id: str | None = None,
     ) -> AsyncIterator[dict]:
         """一次完整问答，产出 query_rewritten → citations → delta*/tool_result* → done。"""
         history = history or []
@@ -122,7 +164,7 @@ class RagPipeline:
                 yield {"type": "query_rewritten", "original": query, "rewritten": retrieval_query}
 
         # 1) 检索（带缓存）
-        chunks = await self._retrieve(retrieval_query)
+        chunks = await self._retrieve(retrieval_query, query_id)
         yield {"type": "citations", "citations": self._citations(chunks)}
 
         # 3) 无资料时的兜底（两种模式可配，面试可讲产品权衡）
@@ -135,10 +177,13 @@ class RagPipeline:
                 }
                 yield {"type": "done"}
                 return
-            messages = [
-                {"role": "system", "content": _FALLBACK_SYSTEM_PROMPT},
-                {"role": "user", "content": retrieval_query},
-            ]
+            messages = [{"role": "system", "content": _FALLBACK_SYSTEM_PROMPT}]
+            if history:
+                for msg in history[-6:]:
+                    messages.append(
+                        {"role": msg.get("role", "user"), "content": str(msg.get("content", ""))}
+                    )
+            messages.append({"role": "user", "content": retrieval_query})
             if self.settings.agent_enabled and TOOL_REGISTRY:
                 async for event in self.agent.run(messages, tools=list(TOOL_REGISTRY.values())):
                     yield event
@@ -158,12 +203,17 @@ class RagPipeline:
                 yield event
         yield {"type": "done"}
 
-    async def chat(self, query: str, history: list[dict] | None = None) -> dict:
+    async def chat(
+        self,
+        query: str,
+        history: list[dict] | None = None,
+        query_id: str | None = None,
+    ) -> dict:
         """非流式问答（用于测试与兜底）：聚合流式结果为完整回答。"""
         answer_parts: list[str] = []
         citations: list[dict] = []
         tools_used: list[dict] = []
-        async for event in self.stream_answer(query, history):
+        async for event in self.stream_answer(query, history, query_id):
             if event["type"] == "citations":
                 citations = event["citations"]
             elif event["type"] == "delta":

@@ -32,3 +32,29 @@ def test_batch_matches_single():
     batch = asyncio.run(e.embed(["文本A", "文本B"]))
     single_a = asyncio.run(e.embed(["文本A"]))[0]
     assert batch[0] == single_a
+
+
+def test_embedder_batching_slices_correctly():
+    """验证 Embedder.embed 能够按 batch_size 自动分片并保序合并。"""
+    from app.rag.embedder import Embedder
+
+    embedder = Embedder(
+        base_url="https://fake-api", api_key="fake-key", model="fake-model", batch_size=2
+    )
+
+    batches: list[list[str]] = []
+
+    async def fake_embed_batch(batch_texts: list[str]) -> list[list[float]]:
+        batches.append(batch_texts)
+        return [[float(len(t))] for t in batch_texts]
+
+    embedder._embed_batch = fake_embed_batch
+    texts = ["a", "bb", "ccc", "dddd", "eeeee"]
+    results = asyncio.run(embedder.embed(texts))
+
+    assert len(results) == 5
+    assert results == [[1.0], [2.0], [3.0], [4.0], [5.0]]
+    assert len(batches) == 3
+    assert batches[0] == ["a", "bb"]
+    assert batches[1] == ["ccc", "dddd"]
+    assert batches[2] == ["eeeee"]

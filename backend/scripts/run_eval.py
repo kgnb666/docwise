@@ -22,6 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.core import utils as core_utils
+from app.core.observability import log_event, new_query_id, truncate
 from app.rag.chunker import make_chunks
 from app.rag.embedder import Embedder
 from app.rag.embedder_hash import HashEmbedder
@@ -72,10 +73,18 @@ async def run_mode(
     for item in test_set:
         query = item["question"]
         qv = (await embedder.embed([query]))[0]
-        results = retriever.retrieve(query, qv)
+        results = await retriever.retrieve(query, qv)
         top_docs = [r.doc_name for r in results]
         hit = item["expected_doc"] in top_docs
         hits += int(hit)
+        log_event(
+            "eval_retrieval",
+            query_id=new_query_id(),
+            query=truncate(query),
+            expected_doc=item["expected_doc"],
+            hit=hit,
+            top_docs=top_docs,
+        )
         details.append(
             {
                 "question": query,
@@ -96,17 +105,25 @@ async def run_mode_api_rerank(
     store, embedder, test_set: list[dict], reranker, top_k: int = 5
 ) -> dict:
     """混合粗召回(top_k) → 云端 rerank API 精排(top_n) → 命中率。"""
-    retriever = Retriever(store, top_k=top_k, rerank_top_k=top_k, alpha=0.4, reranker=NullReranker())
+    # 精排已内聚到 Retriever.retrieve：async reranker 会被自动 await
+    retriever = Retriever(store, top_k=top_k, rerank_top_k=top_k, alpha=0.4, reranker=reranker)
     hits = 0
     details = []
     for item in test_set:
         query = item["question"]
         qv = (await embedder.embed([query]))[0]
-        results = retriever.retrieve(query, qv)
-        results = await reranker.rerank(query, results)  # 云端交叉编码精排
+        results = await retriever.retrieve(query, qv)  # 云端交叉编码精排
         top_docs = [r.doc_name for r in results]
         hit = item["expected_doc"] in top_docs
         hits += int(hit)
+        log_event(
+            "eval_retrieval",
+            query_id=new_query_id(),
+            query=truncate(query),
+            expected_doc=item["expected_doc"],
+            hit=hit,
+            top_docs=top_docs,
+        )
         details.append(
             {
                 "question": query,

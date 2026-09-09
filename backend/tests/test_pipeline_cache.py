@@ -2,11 +2,14 @@
 
 import asyncio
 
+import httpx
+
+from app import deps
 from app.config import Settings
 from app.core.cache import InMemoryTTLCache
 from app.rag.pipeline import RagPipeline
 from app.rag.retriever import Retriever
-from app.storage.vector_store import InMemoryVectorStore
+from app.storage.vector_store import InMemoryVectorStore, get_vector_store
 
 
 class SpyEmbedder:
@@ -82,6 +85,13 @@ class _FakeLLM:
         yield {"type": "delta", "content": "中秋节是中国的传统节日。"}
 
 
+class _QueryVectorEmbedder:
+    """返回固定查询向量 [1,0,0]，保证粗召回先出 c1，便于验证 rerank 翻盘。"""
+
+    async def embed(self, texts: list[str]) -> list[list[float]]:
+        return [[1.0, 0.0, 0.0] for _ in texts]
+
+
 def test_fallback_chat_mode_answers_without_knowledge_base():
     """chat 兜底：知识库为空时调用 LLM 常识回答，而不是返回固定文案。"""
     # 空库 pipeline（检索必然无命中）
@@ -101,3 +111,64 @@ def test_fallback_chat_mode_answers_without_knowledge_base():
     assert types == ["citations", "delta", "done"]
     assert "中秋节" in events[1]["content"]
     assert events[0]["citations"] == []  # 无引用（未命中知识库）
+
+
+class _FakeRerankResponse:
+    def __init__(self, data: dict):
+        self._data = data
+
+    def raise_for_status(self):
+        return None
+
+    def json(self):
+        return self._data
+
+
+class _FakeRerankClient:
+    """替代 httpx.AsyncClient：返回预置 relevance_score，用于验证聊天链路重排。"""
+
+    def __init__(self, response_data: dict):
+        self.response_data = response_data
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args):
+        return False
+
+    async def post(self, url, headers=None, json=None):
+        return _FakeRerankResponse(self.response_data)
+
+
+def test_reranker_api_reorders_citations_in_chat(monkeypatch):
+    """reranker=api + mock rerank 响应：聊天链路跑通，候选按 relevance_score 重排。"""
+    store = get_vector_store()
+    store.clear()
+    store.add("c1", [1.0, 0.0, 0.0], {"doc_id": "d1", "doc_name": "a.md", "index": 0, "text": "苹果"})
+    store.add("c2", [0.0, 1.0, 0.0], {"doc_id": "d2", "doc_name": "b.md", "index": 0, "text": "机器学习 RAG"})
+
+    client = _FakeRerankClient(
+        {
+            "results": [
+                {"index": 1, "relevance_score": 0.99},
+                {"index": 0, "relevance_score": 0.3},
+            ]
+        }
+    )
+    monkeypatch.setattr(httpx, "AsyncClient", lambda *a, **k: client)
+    # 走真实依赖注入：reranker=api 时 get_retriever 自动构造 APIReranker
+    monkeypatch.setattr(deps._settings, "reranker", "api")
+    monkeypatch.setattr(deps._settings, "rerank_base_url", "https://api.example.com/v1")
+    monkeypatch.setattr(deps._settings, "rerank_api_key", "sk-test")
+    monkeypatch.setattr(deps._settings, "rerank_top_n", 2)
+    # 离线链路：关闭 Agent 工具调用与追问改写，避免真实 LLM 依赖
+    monkeypatch.setattr(deps._settings, "agent_enabled", False)
+    monkeypatch.setattr(deps._settings, "query_rewrite_enabled", False)
+
+    p = deps.get_pipeline(embedder=_QueryVectorEmbedder())
+    p.llm = _FakeLLM()
+
+    result = asyncio.run(p.chat("机器学习", []))
+    assert [c["chunk_id"] for c in result["citations"]] == ["c2", "c1"]
+    assert result["citations"][0]["score"] == 0.99
+    assert "中秋节" in result["answer"]  # 走通 LLM 生成（FakeLLM 固定输出）

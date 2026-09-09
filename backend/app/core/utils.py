@@ -69,3 +69,8 @@ def tokenize(text: str) -> list[str]:
 
         return [t.strip().lower() for t in jieba.cut(text) if t.strip()]
     return _legacy_tokenize(text)
+
+
+def estimate_tokens(text: str) -> int:
+    """中英混合粗略估算：约 1.5 字符 ≈ 1 token（日志与成本估算口径）。"""
+    return max(1, int(len(text) / 1.5))

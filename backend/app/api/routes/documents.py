@@ -9,10 +9,11 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
+from app.core.cache import Cache
 from app.core.docx_utils import extract_docx_text
 from app.core.observability import log_event
 from app.core.pdf_utils import extract_pdf_text
-from app.deps import get_embedder
+from app.deps import get_cache, get_embedder
 from app.rag.chunker import make_chunks, new_doc_id
 from app.rag.embedder import Embedder
 from app.storage.document_store import DocumentStore, get_document_store
@@ -39,6 +40,7 @@ async def upload_document(
     file: UploadFile = File(...),
     embedder: Embedder = Depends(get_embedder),
     doc_store: DocumentStore = Depends(get_document_store),
+    cache: Cache | None = Depends(get_cache),
 ) -> dict:
     name = file.filename or "unnamed"
     ext = Path(name).suffix.lower()
@@ -77,15 +79,25 @@ async def upload_document(
                 "doc_name": name,
                 "index": chunk.index,
                 "text": chunk.text,
+                **chunk.metadata,
             },
         )
-        chunk_payloads.append({"index": chunk.index, "text": chunk.text, "vector": vec})
+        chunk_payloads.append(
+            {
+                "index": chunk.index,
+                "text": chunk.text,
+                "vector": vec,
+                "metadata": chunk.metadata,
+            }
+        )
 
     # 4) 注册文档 + 落盘持久化（重启自动恢复）
     doc_store.create(doc_id=doc_id, name=name, chunk_count=len(chunks))
     from app.storage.persistence import save_document
 
     save_document(doc_id, name, chunk_payloads)
+    if cache is not None:
+        cache.clear()
     log_event("upload", name=name, chunk_count=len(chunks))
     return {"doc_id": doc_id, "name": name, "chunk_count": len(chunks)}
 
@@ -117,6 +129,12 @@ async def list_doc_chunks(doc_id: str) -> dict:
                 "chunk_id": it["id"],
                 "index": it["metadata"].get("index", 0),
                 "text": it["metadata"].get("text", ""),
+                "heading_path": it["metadata"].get("heading_path", ""),
+                "metadata": {
+                    k: v
+                    for k, v in it["metadata"].items()
+                    if k not in ("index", "text", "doc_id", "doc_name")
+                },
             }
             for it in items
         ),
@@ -126,7 +144,10 @@ async def list_doc_chunks(doc_id: str) -> dict:
 
 
 @router.delete("/{doc_id}")
-async def delete_document(doc_id: str) -> dict:
+async def delete_document(
+    doc_id: str,
+    cache: Cache | None = Depends(get_cache),
+) -> dict:
     store = get_vector_store()
     doc_store = get_document_store()
     if not doc_store.delete(doc_id):
@@ -135,4 +156,6 @@ async def delete_document(doc_id: str) -> dict:
     from app.storage.persistence import delete_document_file
 
     delete_document_file(doc_id)  # 同步删除磁盘快照
+    if cache is not None:
+        cache.clear()
     return {"doc_id": doc_id, "removed_chunks": removed}

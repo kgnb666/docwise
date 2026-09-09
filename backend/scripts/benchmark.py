@@ -28,6 +28,7 @@ except Exception:  # noqa: S110, BLE001 —— 尽力而为，不支持时保持
     pass
 
 from app.config import get_settings
+from app.core.utils import estimate_tokens
 from app.deps import get_embedder, get_retriever
 from app.rag.pipeline import RagPipeline
 from scripts.run_eval_quality import seed_corpus
@@ -42,11 +43,6 @@ QUESTIONS = [
     "git rebase 和 merge 有什么区别",
     "MySQL 为什么用 B+ 树做索引",
 ]
-
-
-def estimate_tokens(text: str) -> int:
-    """中英混合粗略估算：约 1.5 字符 ≈ 1 token。"""
-    return max(1, int(len(text) / 1.5))
 
 
 async def main() -> None:

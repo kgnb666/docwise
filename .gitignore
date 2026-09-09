@@ -17,6 +17,8 @@ node_modules/
 frontend/dist/
 .npm-cache/
 npm-debug.log*
+frontend/vite.config.local.ts
+frontend/tsconfig.tsbuildinfo
 
 # 数据文件
 *.db
