@@ -160,6 +160,9 @@ curl -s -o /dev/null -w '%{http_code}' -m 15 http://localhost:${Port}${HealthPat
 "@
 # 注意：不要用管道把脚本喂给 ssh 的 stdin——PowerShell 5.1 会注入 UTF-8 BOM，
 # 导致远端 bash 首行报 "command not found"。写成无 BOM 文件再 scp 过去执行。
+# 注意 2：必须先把 CRLF 换成 LF，否则远端 bash 会报 "set: -: invalid option" 这类怪错，
+# 而且旧容器还在跑，健康检查会"假通过"，让你以为部署成功了。
+$remote = $remote -replace "`r`n", "`n"
 [System.IO.File]::WriteAllText($remoteFile, $remote, (New-Object System.Text.UTF8Encoding $false))
 scp -i $SshKey $remoteFile "${User}@${Server}:/root/docwise-deploy-remote.sh"
 if ($LASTEXITCODE -ne 0) { throw "上传部署脚本失败（scp 退出码 $LASTEXITCODE）" }
