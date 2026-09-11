@@ -8,6 +8,7 @@ export interface ChatSession {
   updatedAt: number
 }
 
+export const MAX_SESSIONS = 30
 export const SESSIONS_KEY = 'docwise.sessions.v1'
 export const ACTIVE_KEY = 'docwise.activeSession.v1'
 const LEGACY_KEY = 'docwise.messages.v1'
@@ -29,6 +30,64 @@ export function newSession(messages: ChatMessage[] = []): ChatSession {
   return { id: makeId(), title: sessionTitle(messages), messages, updatedAt: Date.now() }
 }
 
+/**
+ * 按活跃时间（updatedAt 降序）修剪会话，超出上限时淘汰最久未活跃的空闲会话。
+ * 若指定了 activeId，确保当前激活的会话不会被淘汰。
+ */
+export function pruneSessions(
+  sessions: ChatSession[],
+  max: number = MAX_SESSIONS,
+  activeId?: string | null,
+): ChatSession[] {
+  if (sessions.length <= max) return sessions
+
+  // 按 updatedAt 降序排序（较新的在前）
+  const sorted = [...sessions].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+
+  let retained: ChatSession[] = []
+  if (activeId && sessions.some((s) => s.id === activeId)) {
+    const active = sessions.find((s) => s.id === activeId)!
+    const others = sorted.filter((s) => s.id !== activeId)
+    retained = [active, ...others.slice(0, Math.max(0, max - 1))]
+  } else {
+    retained = sorted.slice(0, max)
+  }
+
+  const retainedIds = new Set(retained.map((s) => s.id))
+  // 保持在原有列表中的相对顺序
+  return sessions.filter((s) => retainedIds.has(s.id))
+}
+
+/**
+ * 安全保存会话列表到 localStorage：
+ * 1. 预先修剪至最多 MAX_SESSIONS 个会话；
+ * 2. 若发生 QuotaExceededError 或写入异常，循环淘汰最旧会话并重试写入；
+ * 3. 返回最终成功写入（或最后修剪）的会话列表。
+ */
+export function saveSessions(
+  sessions: ChatSession[],
+  storage?: Pick<Storage, 'setItem' | 'getItem'> | null,
+  activeId?: string | null,
+): ChatSession[] {
+  const store = storage ?? (typeof window !== 'undefined' ? window.localStorage : null)
+  let current = pruneSessions(sessions, MAX_SESSIONS, activeId)
+  if (!store) return current
+
+  while (current.length > 0) {
+    try {
+      store.setItem(SESSIONS_KEY, JSON.stringify(current))
+      return current
+    } catch {
+      // 达到浏览器存储上限或写入异常：进一步淘汰最旧会话重试
+      if (current.length <= 1) {
+        break
+      }
+      current = pruneSessions(current, current.length - 1, activeId)
+    }
+  }
+  return current
+}
+
 export function loadSessions(
   storage?: Pick<Storage, 'getItem'> | null,
 ): { sessions: ChatSession[]; activeId: string | null } {
@@ -42,10 +101,11 @@ export function loadSessions(
         const sessions = parsed.filter(
           (s): s is ChatSession => !!s && typeof s.id === 'string' && Array.isArray(s.messages),
         )
+        const pruned = pruneSessions(sessions, MAX_SESSIONS)
         const activeId = store.getItem(ACTIVE_KEY)
         return {
-          sessions,
-          activeId: sessions.some((s) => s.id === activeId) ? activeId : (sessions[0]?.id ?? null),
+          sessions: pruned,
+          activeId: pruned.some((s) => s.id === activeId) ? activeId : (pruned[0]?.id ?? null),
         }
       }
     }

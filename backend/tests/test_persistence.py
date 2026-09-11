@@ -101,3 +101,55 @@ def test_import_kb_persists():
     docs = load_all_documents()
     assert len(docs) == 1
     assert docs[0]["name"] == "rag-notes.md"
+
+
+def test_restore_preserves_heading_metadata():
+    """验证重启从磁盘恢复时，分块的标题层级元数据（heading_path / headings）能够完整保留。"""
+    chunks = [
+        {
+            "index": 0,
+            "text": "[核心设计 > 混合检索]\nBM25 结合向量检索",
+            "vector": [0.5, 0.5],
+            "metadata": {
+                "headings": ["核心设计", "混合检索"],
+                "heading_path": "核心设计 > 混合检索",
+            },
+        }
+    ]
+    save_document("doc_heading", "设计文档.md", chunks)
+
+    reset_vector_store()
+    reset_document_store()
+
+    from app.storage.persistence import restore_to_stores
+
+    restored = restore_to_stores(get_vector_store(), get_document_store())
+    assert restored == 1
+
+    items = get_vector_store().get_by_doc("doc_heading")
+    assert len(items) == 1
+    meta = items[0]["metadata"]
+    assert meta.get("heading_path") == "核心设计 > 混合检索"
+    assert meta.get("headings") == ["核心设计", "混合检索"]
+    assert meta.get("doc_name") == "设计文档.md"
+
+
+def test_restore_preserves_created_at_timestamp():
+    """验证重启从磁盘恢复时，文档的原始上传时间（created_at）能够完整保留，而不是被重置为当前时刻。"""
+    chunks = [{"index": 0, "text": "内容", "vector": [0.1, 0.2]}]
+    custom_time = "2024-01-01 12:00:00"
+    save_document("doc_time", "历史文档.md", chunks, created_at=custom_time)
+
+    reset_vector_store()
+    reset_document_store()
+
+    from app.storage.persistence import restore_to_stores
+
+    restored = restore_to_stores(get_vector_store(), get_document_store())
+    assert restored == 1
+
+    doc = get_document_store().get("doc_time")
+    assert doc is not None
+    assert doc["created_at"] == custom_time
+
+

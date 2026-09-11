@@ -15,12 +15,19 @@ class DocumentStore:
         self._docs: dict[str, dict] = {}
         self._lock = threading.Lock()
 
-    def create(self, doc_id: str, name: str, chunk_count: int, **extra) -> dict:
+    def create(
+        self,
+        doc_id: str,
+        name: str,
+        chunk_count: int,
+        created_at: str | None = None,
+        **extra,
+    ) -> dict:
         doc = {
             "doc_id": doc_id,
             "name": name,
             "chunk_count": chunk_count,
-            "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "created_at": created_at or time.strftime("%Y-%m-%d %H:%M:%S"),
             **extra,
         }
         with self._lock:

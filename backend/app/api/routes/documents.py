@@ -53,7 +53,12 @@ async def upload_document(
     raw = await file.read()
     if len(raw) > MAX_FILE_SIZE:
         raise HTTPException(status_code=400, detail="文件超过 10MB 上限")
-    text = _read_text(ext, raw).strip()
+    try:
+        text = _read_text(ext, raw).strip()
+    except Exception as exc:
+        raise HTTPException(
+            status_code=400, detail=f"文件解析失败（可能已损坏或格式不兼容）：{exc}"
+        ) from exc
     if not text:
         raise HTTPException(status_code=400, detail="文件内容为空（可能是扫描件 PDF，需要 OCR，后续版本支持）")
 
@@ -92,10 +97,10 @@ async def upload_document(
         )
 
     # 4) 注册文档 + 落盘持久化（重启自动恢复）
-    doc_store.create(doc_id=doc_id, name=name, chunk_count=len(chunks))
+    doc = doc_store.create(doc_id=doc_id, name=name, chunk_count=len(chunks))
     from app.storage.persistence import save_document
 
-    save_document(doc_id, name, chunk_payloads)
+    save_document(doc_id, name, chunk_payloads, created_at=doc.get("created_at"))
     if cache is not None:
         cache.clear()
     log_event("upload", name=name, chunk_count=len(chunks))

@@ -57,10 +57,20 @@ marked.setOptions({
 
 export { marked }
 
-/** 把消毒后的 HTML 中的 [1]/[2] 引用序号替换为可点击按钮。 */
+/** 把消毒后的 HTML 中的 [1]/[2] 引用序号替换为可点击按钮，同时保护代码块（pre/code）与 HTML 标签属性不被破坏。 */
 export function linkifyCitationRefs(html: string): string {
-  return html.replace(/\[(\d{1,2})\]/g, (_match, n: string) =>
-    `<button type="button" class="ref-chip" data-ref="${n}">[${n}]</button>`,
-  )
+  const parts = html.split(/(<pre[\s\S]*?<\/pre>|<code[\s\S]*?<\/code>|<[^>]+>)/gi)
+  return parts
+    .map((part) => {
+      if (part.startsWith('<')) {
+        return part
+      }
+      return part.replace(
+        /\[(\d{1,2})\]/g,
+        (_match, n: string) =>
+          `<button type="button" class="ref-chip" data-ref="${n}">[${n}]</button>`,
+      )
+    })
+    .join('')
 }
 

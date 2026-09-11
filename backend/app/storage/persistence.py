@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import threading
+import time
 from pathlib import Path
 
 from app.config import get_settings
@@ -37,12 +38,18 @@ def _doc_path(doc_id: str) -> Path:
     return documents_dir() / f"{doc_id}.json"
 
 
-def save_document(doc_id: str, name: str, chunks: list[dict]) -> Path:
+def save_document(
+    doc_id: str,
+    name: str,
+    chunks: list[dict],
+    created_at: str | None = None,
+) -> Path:
     """保存文档快照。chunks 形如 [{"index": 0, "text": "...", "vector": [...]}]。"""
     payload = {
         "doc_id": doc_id,
         "name": name,
         "chunks": chunks,
+        "created_at": created_at or time.strftime("%Y-%m-%d %H:%M:%S"),
     }
     path = _doc_path(doc_id)
     with _lock:
@@ -90,8 +97,14 @@ def restore_to_stores(store, doc_store) -> int:
                     "doc_name": payload["name"],
                     "index": chunk["index"],
                     "text": chunk["text"],
+                    **chunk.get("metadata", {}),
                 },
             )
-        doc_store.create(doc_id=doc_id, name=payload["name"], chunk_count=len(payload["chunks"]))
+        doc_store.create(
+            doc_id=doc_id,
+            name=payload["name"],
+            chunk_count=len(payload["chunks"]),
+            created_at=payload.get("created_at"),
+        )
         restored += 1
     return restored

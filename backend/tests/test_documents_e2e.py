@@ -120,3 +120,28 @@ def test_cache_cleared_on_upload_and_delete():
         del_resp = client.delete(f"/api/documents/{doc_id}")
         assert del_resp.status_code == 200
         assert cache.get("test_key2") is None
+
+
+def test_upload_corrupted_pdf_returns_400():
+    """上传损坏的 PDF 文件应返回 400 且包含中文错误说明。"""
+    client = TestClient(app)
+    corrupted_pdf = b"NOT_A_REAL_PDF_HEADER_JUST_GARBAGE_CONTENT"
+    resp = client.post(
+        "/api/documents",
+        files={"file": ("corrupted.pdf", corrupted_pdf, "application/pdf")},
+    )
+    assert resp.status_code == 400
+    assert "文件解析失败" in resp.json()["detail"]
+
+
+def test_upload_corrupted_docx_returns_400():
+    """上传损坏的 DOCX 文件应返回 400 且包含中文错误说明。"""
+    client = TestClient(app)
+    corrupted_docx = b"INVALID_ZIP_ARCHIVE_NOT_DOCX"
+    resp = client.post(
+        "/api/documents",
+        files={"file": ("corrupted.docx", corrupted_docx, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")},
+    )
+    assert resp.status_code == 400
+    assert "文件解析失败" in resp.json()["detail"]
+

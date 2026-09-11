@@ -70,6 +70,22 @@ describe('streamChat', () => {
     expect(errors).toEqual(['请求失败：HTTP 500'])
   })
 
+  it('HTTP 错误时优先提取响应体的 detail 说明', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify({ detail: '请求过于频繁，请稍后再试' }), {
+            status: 429,
+            headers: { 'Content-Type': 'application/json' },
+          }),
+      ),
+    )
+    const errors: string[] = []
+    await streamChat('问题', [], { onError: (m) => errors.push(m) })
+    expect(errors).toEqual(['请求过于频繁，请稍后再试'])
+  })
+
   it('被 AbortController 中断 fetch 时优雅触发 onDone 且不报错', async () => {
     const ac = new AbortController()
     vi.stubGlobal(

@@ -14,6 +14,19 @@ describe('linkifyCitationRefs', () => {
     expect(html).toContain('[1.5] 是数字')
     expect(html).not.toContain('ref-chip')
   })
+
+  it('保护行内代码与代码块中的数组索引（如 arr[1]），不被替换为引用按钮', () => {
+    const input = '<p>参考 [1]：代码中使用 <code>arr[1]</code> 获取，或者：</p><pre><code class="language-python">val = arr[2]\nprint(items[1])</code></pre>'
+    const html = linkifyCitationRefs(input)
+    // 文本中的 [1] 被转为按钮
+    expect(html).toContain('<button type="button" class="ref-chip" data-ref="1">[1]</button>')
+    // <code> 中的 arr[1] 保持原样
+    expect(html).toContain('<code>arr[1]</code>')
+    // <pre><code> 中的 arr[2] 和 items[1] 保持原样
+    expect(html).toContain('val = arr[2]')
+    expect(html).toContain('print(items[1])')
+    expect(html).not.toContain('data-ref="2"')
+  })
 })
 
 describe('highlightCode and marked code blocks', () => {

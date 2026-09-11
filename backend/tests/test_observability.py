@@ -2,13 +2,14 @@
 
 import asyncio
 import logging
+from logging.handlers import RotatingFileHandler
 
 import pytest
 from fastapi.testclient import TestClient
 
 from app.config import Settings
 from app.core.cache import InMemoryTTLCache
-from app.core.observability import JsonFormatter, new_query_id, truncate
+from app.core.observability import JsonFormatter, new_query_id, setup_logging, truncate
 from app.eval.judge import LLMJudge
 from app.eval.runner import QualityEvaluator
 from app.rag.pipeline import RagPipeline
@@ -28,10 +29,13 @@ class CapturingHandler(logging.Handler):
 @pytest.fixture
 def captured():
     logger = logging.getLogger("docwise")
+    old_level = logger.level
+    logger.setLevel(logging.INFO)
     handler = CapturingHandler()
     logger.addHandler(handler)
     yield handler
     logger.removeHandler(handler)
+    logger.setLevel(old_level)
 
 
 class _SpyEmbedder:
@@ -152,3 +156,20 @@ def test_new_query_id_unique_and_truncate():
     assert truncate("短文本") == "短文本"
     assert len(truncate("x" * 300)) <= 201  # 200 字符 + 省略号
     assert truncate(None) == ""
+
+
+def test_setup_logging_uses_rotating_file_handler(tmp_path):
+    """验证日志初始化配置了 RotatingFileHandler，且单文件上限为 10MB，保留 5 个备份。"""
+    logger = logging.getLogger("docwise")
+    old_handlers = list(logger.handlers)
+    logger.handlers.clear()
+    try:
+        setup_logging(tmp_path)
+        rotating = [h for h in logger.handlers if isinstance(h, RotatingFileHandler)]
+        assert len(rotating) == 1
+        handler = rotating[0]
+        assert handler.maxBytes == 10 * 1024 * 1024
+        assert handler.backupCount == 5
+    finally:
+        logger.handlers = old_handlers
+

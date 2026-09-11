@@ -26,9 +26,14 @@ router = APIRouter()
 _settings = get_settings()
 
 
+class ChatHistoryItem(BaseModel):
+    role: str = Field(default="user", description="消息角色 (user / assistant)")
+    content: str = Field(max_length=2000, description="历史消息内容，单条最多 2000 字符")
+
+
 class ChatRequest(BaseModel):
     query: str = Field(min_length=1, max_length=2000, description="用户问题")
-    history: list[dict] = Field(default_factory=list, description="历史消息 [{role, content}]")
+    history: list[ChatHistoryItem] = Field(default_factory=list, description="历史消息 [{role, content}]")
 
 
 def get_client_ip(request: Request) -> str:
@@ -60,11 +65,14 @@ async def chat(req: ChatRequest, pipeline: RagPipeline = Depends(get_pipeline)) 
     """非流式问答（便于测试与调试）。"""
     t0 = time.perf_counter()
     query_id = new_query_id()
+    history_dicts = [h.model_dump() for h in req.history]
     try:
-        result = await pipeline.chat(req.query, req.history, query_id=query_id)
-        est_input = estimate_tokens(req.query) + sum(
-            estimate_tokens(c.get("text", "")) for c in result["citations"]
-        ) + sum(estimate_tokens(str(h.get("content", ""))) for h in req.history)
+        result = await pipeline.chat(req.query, history_dicts, query_id=query_id)
+        est_input = (
+            estimate_tokens(req.query)
+            + sum(estimate_tokens(c.get("text", "")) for c in result["citations"])
+            + sum(estimate_tokens(h.content) for h in req.history)
+        )
         log_event(
             "chat",
             query_id=query_id,
@@ -91,6 +99,7 @@ async def chat_stream(req: ChatRequest, pipeline: RagPipeline = Depends(get_pipe
     """流式问答（SSE）。前端解析事件：query_rewritten / citations / delta / tool_result / done。"""
     t0 = time.perf_counter()
     query_id = new_query_id()
+    history_dicts = [h.model_dump() for h in req.history]
     citations: list[dict] = []
     answer_chars = 0
 
@@ -98,16 +107,18 @@ async def chat_stream(req: ChatRequest, pipeline: RagPipeline = Depends(get_pipe
         nonlocal citations, answer_chars
         try:
             async for event in pipeline.stream_answer(
-                req.query, req.history, query_id=query_id
+                req.query, history_dicts, query_id=query_id
             ):
                 if event["type"] == "citations":
                     citations = event["citations"]
                 elif event["type"] == "delta":
                     answer_chars += len(event["content"])
                 yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
-            est_input = estimate_tokens(req.query) + sum(
-                estimate_tokens(c.get("text", "")) for c in citations
-            ) + sum(estimate_tokens(str(h.get("content", ""))) for h in req.history)
+            est_input = (
+                estimate_tokens(req.query)
+                + sum(estimate_tokens(c.get("text", "")) for c in citations)
+                + sum(estimate_tokens(h.content) for h in req.history)
+            )
             log_event(
                 "chat_stream",
                 query_id=query_id,

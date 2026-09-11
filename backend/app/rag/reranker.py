@@ -99,6 +99,8 @@ class APIReranker:
         self.top_n = top_n
 
     async def rerank(self, query: str, candidates: list) -> list:
+        if not candidates:
+            return []
         import httpx
 
         from app.core.retry import with_retry

@@ -38,7 +38,7 @@ def test_rate_limiter_cleans_expired_buckets():
     rl = RateLimiter(capacity=1, refill_per_sec=0, expiry_seconds=0.05)
     rl.allow("old_key")
     assert "old_key" in rl._buckets
-    time.sleep(0.06)
+    time.sleep(0.1)
     # 强制让其超过容量或达到时间触发清理
     rl._last_cleanup = 0.0
     rl.allow("new_key")

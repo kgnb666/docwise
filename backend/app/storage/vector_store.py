@@ -56,6 +56,14 @@ class VectorStore:
         """返回全量向量记录列表，格式为 [{'id': ..., 'vector': ..., 'metadata': ...}]。"""
         raise NotImplementedError
 
+    def delete_by_doc(self, doc_id: str) -> int:
+        """按文档 ID 删除该文档的所有分块向量，返回删除数量。"""
+        raise NotImplementedError
+
+    def get_by_doc(self, doc_id: str) -> list[dict]:
+        """按文档 ID 获取该文档的所有记录（id + metadata）。"""
+        raise NotImplementedError
+
     @property
     def revision(self) -> int:
         """内容版本号：每次增删 +1，供检索器判断是否需要重建索引。"""

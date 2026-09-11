@@ -80,3 +80,40 @@ def test_stream_empty_store_fallback():
     types = [e["type"] for e in events]
     assert types == ["citations", "delta", "done"]
     assert "还没有相关内容" in events[1]["content"]
+
+
+def test_stream_oversized_history_rejected():
+    """单条 history content 超过 2000 字符时，FastAPI Pydantic 校验直接拒绝（422 Unprocessable Entity）。"""
+    client = TestClient(app)
+    oversized_content = "A" * 2001
+    resp = client.post(
+        "/api/chat/stream",
+        json={
+            "query": "测试问题",
+            "history": [{"role": "user", "content": oversized_content}],
+        },
+    )
+    assert resp.status_code == 422
+
+
+def test_stream_valid_max_history_accepted():
+    """单条 history content 在 2000 字符以内时正常接受并流式返回。"""
+    client = TestClient(app)
+    valid_content = "B" * 2000
+    with client.stream(
+        "POST",
+        "/api/chat/stream",
+        json={
+            "query": "你好",
+            "history": [{"role": "user", "content": valid_content}],
+        },
+    ) as stream:
+        assert stream.status_code == 200
+        body = "".join(stream.iter_text())
+
+    events = _parse_sse(body)
+    types = [e["type"] for e in events]
+    assert "citations" in types
+    assert "delta" in types
+    assert types[-1] == "done"
+

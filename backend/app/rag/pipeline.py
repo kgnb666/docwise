@@ -59,11 +59,11 @@ def build_messages(
     )
     messages: list[dict] = [{"role": "system", "content": _SYSTEM_PROMPT}]
 
-    # 规范化追加最近 N 轮历史消息，保留 role 与 content
+    # 规范化追加最近 N 轮历史消息，保留 role 与 content（双重防御超长历史）
     if history:
         for msg in history[-max_history_turns:]:
             role = msg.get("role", "user")
-            content = str(msg.get("content", ""))
+            content = str(msg.get("content", ""))[:2000]
             messages.append({"role": role, "content": content})
 
     user_content = f"参考资料：\n{refs}\n\n问题：{query}" if refs else f"问题：{query}"
@@ -181,7 +181,7 @@ class RagPipeline:
             if history:
                 for msg in history[-6:]:
                     messages.append(
-                        {"role": msg.get("role", "user"), "content": str(msg.get("content", ""))}
+                        {"role": msg.get("role", "user"), "content": str(msg.get("content", ""))[:2000]}
                     )
             messages.append({"role": "user", "content": retrieval_query})
             if self.settings.agent_enabled and TOOL_REGISTRY:

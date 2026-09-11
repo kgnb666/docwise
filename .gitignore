@@ -8,9 +8,11 @@ venv/
 .mypy_cache/
 .ruff_cache/
 
-# 环境变量（密钥不入库）
+# 环境变量与部署机密（密钥不入库）
 .env
 .env.local
+deploy-config.json
+scripts/deploy-config.json
 
 # Node / 前端
 node_modules/

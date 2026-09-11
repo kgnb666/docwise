@@ -18,6 +18,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
+import httpx
+
 TOOL_REGISTRY: dict[str, Tool] = {}
 
 
@@ -60,9 +62,11 @@ _CALC_SAFE = re.compile(r"^[\d\s+\-*/().,]+$")
 def _calc(expression: str) -> str:
     if not _CALC_SAFE.match(expression):
         return "错误：表达式包含非法字符"
+    if "**" in expression or "^" in expression:
+        return "错误：不支持幂运算"
     try:
-        # eval 经过白名单校验，仅用于简单四则运算；后续可换 ast 解析更安全
-        return str(eval(expression))
+        # eval 经过白名单校验，仅用于简单四则运算；封禁内置函数防止逃逸与 DoS
+        return str(eval(expression, {"__builtins__": None}, {}))
     except Exception as exc:  # noqa: BLE001
         return f"错误：{exc}"
 
@@ -100,12 +104,16 @@ def format_wiki_hits(hits: list[dict], limit: int) -> str:
     return "\n".join(lines)
 
 
-async def _wiki_search(query: str, limit: int = 3) -> str:
-    """调用维基百科搜索 API（多节点容错），返回标题 + 摘要片段。
+async def _wiki_search(
+    query: str, limit: int = 3, client: Any = None
+) -> str:
+    """调用维基百科搜索 API（多节点容错与全局连接池复用），返回标题 + 摘要片段。
 
     错误处理：可读的中文错误信息（而不是空字符串），超时自动切换备用节点。
     """
-    import httpx
+    from app.deps import get_http_client
+
+    http_client = client or get_http_client()
 
     params = {
         "action": "query",
@@ -118,10 +126,9 @@ async def _wiki_search(query: str, limit: int = 3) -> str:
     last_error = "维基百科暂时无法访问"
     for host in _WIKI_HOSTS:
         try:
-            async with httpx.AsyncClient(timeout=10) as client:
-                resp = await client.get(host, params=params)
-                resp.raise_for_status()
-                data = resp.json()
+            resp = await http_client.get(host, params=params, timeout=10)
+            resp.raise_for_status()
+            data = resp.json()
             hits = data.get("query", {}).get("search", [])
             return format_wiki_hits(hits, limit)
         except httpx.HTTPStatusError as exc:

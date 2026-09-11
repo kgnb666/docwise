@@ -39,7 +39,9 @@ export async function streamChat(
   }
 
   if (!resp.ok || !resp.body) {
-    handlers.onError?.(`请求失败：HTTP ${resp.status}`)
+    const errData = await resp.json().catch(() => null)
+    const msg = (errData && typeof errData.detail === 'string') ? errData.detail : `请求失败：HTTP ${resp.status}`
+    handlers.onError?.(msg)
     return
   }
 
@@ -154,6 +156,7 @@ export interface DocChunk {
   chunk_id: string
   index: number
   text: string
+  heading_path?: string
 }
 
 /** 查看某文档被切成哪些块（演示"知识如何被切分"）。 */

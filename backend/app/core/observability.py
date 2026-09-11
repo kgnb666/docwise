@@ -10,6 +10,7 @@ import json
 import logging
 import time
 import uuid
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 
@@ -30,7 +31,7 @@ class JsonFormatter(logging.Formatter):
 
 
 def setup_logging(log_dir: str | Path = "logs") -> None:
-    """幂等初始化：控制台 + 文件（JSON Lines）。"""
+    """幂等初始化：控制台 + 文件（JSON Lines，带大小上限与自动轮转）。"""
     logger = logging.getLogger("docwise")
     if logger.handlers:  # 已初始化
         return
@@ -43,7 +44,12 @@ def setup_logging(log_dir: str | Path = "logs") -> None:
 
     log_dir = Path(log_dir)
     log_dir.mkdir(parents=True, exist_ok=True)
-    file_handler = logging.FileHandler(log_dir / "app.log", encoding="utf-8")
+    file_handler = RotatingFileHandler(
+        log_dir / "app.log",
+        maxBytes=10 * 1024 * 1024,
+        backupCount=5,
+        encoding="utf-8",
+    )
     file_handler.setFormatter(fmt)
     logger.addHandler(file_handler)
 

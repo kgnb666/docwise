@@ -86,11 +86,24 @@ async def import_kb(
             store.add(
                 c.id,
                 v,
-                {"doc_id": doc_id, "doc_name": f.name, "index": c.index, "text": c.text},
+                {
+                    "doc_id": doc_id,
+                    "doc_name": f.name,
+                    "index": c.index,
+                    "text": c.text,
+                    **c.metadata,
+                },
             )
-            chunk_payloads.append({"index": c.index, "text": c.text, "vector": v})
-        doc_store.create(doc_id=doc_id, name=f.name, chunk_count=len(chunks))
-        save_document(doc_id, f.name, chunk_payloads)  # 持久化：重启自动恢复
+            chunk_payloads.append(
+                {
+                    "index": c.index,
+                    "text": c.text,
+                    "vector": v,
+                    "metadata": c.metadata,
+                }
+            )
+        doc = doc_store.create(doc_id=doc_id, name=f.name, chunk_count=len(chunks))
+        save_document(doc_id, f.name, chunk_payloads, created_at=doc.get("created_at"))  # 持久化：重启自动恢复
         total_chunks += len(chunks)
         imported.append({"name": f.name, "chunks": len(chunks)})
         print(f"  ✅ {f.name}: {len(chunks)} 块")

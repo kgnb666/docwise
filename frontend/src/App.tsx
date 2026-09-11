@@ -16,10 +16,10 @@ import { linkifyCitationRefs, marked } from './markdown'
 import {
   loadSessions,
   newSession,
+  saveSessions,
   sessionTitle,
   timeLabel,
   ACTIVE_KEY,
-  SESSIONS_KEY,
   type ChatSession,
 } from './sessions'
 import './styles.css'
@@ -101,6 +101,8 @@ export default function App() {
   const [streaming, setStreaming] = useState(false)
   const [docs, setDocs] = useState<DocInfo[]>([])
   const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null)
+  const [docSearch, setDocSearch] = useState('')
   const [stats, setStats] = useState({ documents: 0, chunks: 0 })
   const [sysInfo, setSysInfo] = useState<SystemInfo | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -136,14 +138,17 @@ export default function App() {
     }
   }, [sessions.length])
 
-  // 会话持久化：每次变化都保存
+  // 会话持久化：每次变化都保存（带配额保护与 LRU 淘汰）
   useEffect(() => {
     try {
-      localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions))
+      const saved = saveSessions(sessions, undefined, activeId)
+      if (saved.length !== sessions.length) {
+        setSessions(saved)
+      }
     } catch {
       // 存储不可用时静默降级（隐私模式等）
     }
-  }, [sessions])
+  }, [sessions, activeId])
 
   useEffect(() => {
     try {
@@ -175,7 +180,7 @@ export default function App() {
   }
 
   function clearActiveSession() {
-    if (!activeId) return
+    if (!activeId || streaming) return
     setSessions((prev) =>
       prev.map((s) =>
         s.id === activeId ? { ...s, title: '新会话', messages: [], updatedAt: Date.now() } : s,
@@ -242,7 +247,7 @@ export default function App() {
     const patch = (content: string, cites: Citation[], tools: ToolCall[], rewritten?: string) => {
       setSessions((prev) =>
         prev.map((s) => {
-          if (s.id !== targetId) return s
+          if (s.id !== targetId || s.messages.length === 0) return s
           const copy = [...s.messages]
           copy[copy.length - 1] = {
             role: 'assistant',
@@ -362,16 +367,27 @@ export default function App() {
   // ---------- 文档操作 ----------
 
   async function handleUpload(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file || uploading) return
+    const files = Array.from(e.target.files ?? [])
+    if (files.length === 0 || uploading) return
     setUploading(true)
+    const errors: string[] = []
     try {
-      await uploadDoc(file)
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        setUploadProgress(`正在上传第 ${i + 1}/${files.length} 篇…`)
+        try {
+          await uploadDoc(file)
+        } catch (err) {
+          errors.push(`${file.name}: ${err instanceof Error ? err.message : '上传失败'}`)
+        }
+      }
       await refreshDocs()
-    } catch (err) {
-      alert(err instanceof Error ? err.message : '上传失败')
+      if (errors.length > 0) {
+        alert(`部分文档上传失败：\n${errors.join('\n')}`)
+      }
     } finally {
       setUploading(false)
+      setUploadProgress(null)
       e.target.value = ''
     }
   }
@@ -446,7 +462,7 @@ export default function App() {
                 <button className="new-session" onClick={createSession} title="新建会话">
                   ＋ 新建
                 </button>
-                <button className="clear-btn" onClick={clearActiveSession} title="清空当前会话">
+                <button className="clear-btn" onClick={clearActiveSession} disabled={streaming} title="清空当前会话">
                   🗑 清空
                 </button>
               </div>
@@ -620,16 +636,26 @@ export default function App() {
         <main className="docs-page">
           <div className="docs-header">
             <h2>📚 文档管理</h2>
-            <label className={`upload-btn ${uploading ? 'disabled' : ''}`}>
-              {uploading ? '⏳ 上传解析中…' : '📤 上传文档（txt / md / pdf / docx）'}
+            <div className="docs-header-actions">
               <input
-                type="file"
-                accept=".txt,.md,.markdown,.pdf,.docx"
-                hidden
-                disabled={uploading}
-                onChange={handleUpload}
+                type="text"
+                className="docs-search-input"
+                placeholder="🔍 搜索文档名称…"
+                value={docSearch}
+                onChange={(e) => setDocSearch(e.target.value)}
               />
-            </label>
+              <label className={`upload-btn ${uploading ? 'disabled' : ''}`}>
+                {uploadProgress ?? (uploading ? '⏳ 上传中…' : '📤 上传文档（txt / md / pdf / docx）')}
+                <input
+                  type="file"
+                  accept=".txt,.md,.markdown,.pdf,.docx"
+                  hidden
+                  multiple
+                  disabled={uploading}
+                  onChange={handleUpload}
+                />
+              </label>
+            </div>
           </div>
           <div className="stats">
             <span>📄 文档 {stats.documents}</span>
@@ -643,23 +669,29 @@ export default function App() {
               <span>操作</span>
             </div>
             {docs.length === 0 && <p className="docs-empty">还没有文档，先上传几份试试</p>}
-            {docs.map((doc) => (
-              <div key={doc.doc_id} className="docs-row">
-                <span className="doc-name" title={doc.name}>
-                  {doc.name}
-                </span>
-                <span className="doc-meta">{doc.created_at ?? '—'}</span>
-                <span className="doc-meta">{doc.chunk_count} 块</span>
-                <span className="doc-actions">
-                  <button className="doc-view" onClick={() => handleViewChunks(doc)} title="查看分块">
-                    🧩 查看分块
-                  </button>
-                  <button className="doc-delete" onClick={() => handleDelete(doc.doc_id, doc.name)} title="删除">
-                    🗑 删除
-                  </button>
-                </span>
-              </div>
-            ))}
+            {docs.length > 0 &&
+              docs.filter((d) => !docSearch.trim() || d.name.toLowerCase().includes(docSearch.trim().toLowerCase())).length === 0 && (
+                <p className="docs-empty">未找到匹配「{docSearch}」的文档</p>
+              )}
+            {docs
+              .filter((d) => !docSearch.trim() || d.name.toLowerCase().includes(docSearch.trim().toLowerCase()))
+              .map((doc) => (
+                <div key={doc.doc_id} className="docs-row">
+                  <span className="doc-name" title={doc.name}>
+                    {doc.name}
+                  </span>
+                  <span className="doc-meta">{doc.created_at ?? '—'}</span>
+                  <span className="doc-meta">{doc.chunk_count} 块</span>
+                  <span className="doc-actions">
+                    <button className="doc-view" onClick={() => handleViewChunks(doc)} title="查看分块">
+                      🧩 查看分块
+                    </button>
+                    <button className="doc-delete" onClick={() => handleDelete(doc.doc_id, doc.name)} title="删除">
+                      🗑 删除
+                    </button>
+                  </span>
+                </div>
+              ))}
           </div>
         </main>
       )}
@@ -681,7 +713,14 @@ export default function App() {
               )}
               {chunkView.chunks.map((c) => (
                 <div key={c.chunk_id} className="chunk-item">
-                  <span className="chunk-index">#{c.index}</span>
+                  <div className="chunk-header">
+                    <span className="chunk-index">#{c.index}</span>
+                    {c.heading_path && (
+                      <span className="chunk-heading" title={c.heading_path}>
+                        🏷️ {c.heading_path}
+                      </span>
+                    )}
+                  </div>
                   <span className="chunk-text">{c.text}</span>
                 </div>
               ))}
