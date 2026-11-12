@@ -6,6 +6,7 @@
 
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,6 +22,8 @@ class Settings(BaseSettings):
     port: int = 8000
     # 持久化数据目录（文档快照；可被 DATA_DIR 环境变量覆盖，测试隔离用）
     data_dir: str = "data"
+    auth_cookie_secure: bool = True
+    auth_session_seconds: int = Field(default=86400, gt=0)
 
     # LLM（OpenAI 兼容接口）
     openai_base_url: str = "https://api.openai.com/v1"

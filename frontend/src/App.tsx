@@ -8,12 +8,15 @@ import {
   fetchSystemInfo,
   streamChat,
   uploadDoc,
+  type Account,
   type DocChunk,
   type SystemInfo,
 } from './api'
+import { AuthGate } from './AuthGate'
 import type { ChatMessage, Citation, DocInfo, ToolCall } from './types'
 import { linkifyCitationRefs, marked } from './markdown'
 import {
+  accountSessionStorage,
   loadSessions,
   newSession,
   saveSessions,
@@ -86,8 +89,17 @@ function Markdown({ text, onRefClick }: { text: string; onRefClick?: (n: number)
 }
 
 export default function App() {
+  return (
+    <AuthGate>
+      {(account, logout) => <WorkspaceApp key={account.id} account={account} logout={logout} />}
+    </AuthGate>
+  )
+}
+
+function WorkspaceApp({ account, logout }: { account: Account; logout: () => Promise<void> }) {
+  const storage = useMemo(() => accountSessionStorage(account.id), [account.id])
   const [view, setView] = useState<'chat' | 'docs'>('chat')
-  const [initial] = useState(loadSessions)
+  const [initial] = useState(() => loadSessions(storage))
   const [sessions, setSessions] = useState<ChatSession[]>(initial.sessions)
   const [activeId, setActiveId] = useState<string | null>(initial.activeId)
   // 移动端：侧边栏抽屉开关（桌面端无效果）
@@ -102,25 +114,34 @@ export default function App() {
   const [docs, setDocs] = useState<DocInfo[]>([])
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<string | null>(null)
+  const [uploadError, setUploadError] = useState('')
   const [docSearch, setDocSearch] = useState('')
   const [stats, setStats] = useState({ documents: 0, chunks: 0 })
   const [sysInfo, setSysInfo] = useState<SystemInfo | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
+  const uploadAbortRef = useRef<AbortController | null>(null)
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
+  const [leaving, setLeaving] = useState(false)
+  const [logoutError, setLogoutError] = useState('')
 
   const activeSession = sessions.find((s) => s.id === activeId) ?? null
   const messages = activeSession?.messages ?? []
 
   const refreshDocs = useCallback(async () => {
-    const [docList, st] = await Promise.all([fetchDocs(), fetchStats()])
+    const [docList, st] = await Promise.all([fetchDocs(account.id), fetchStats(account.id)])
     setDocs(docList)
     setStats(st)
-  }, [])
+  }, [account.id])
 
   useEffect(() => {
-    refreshDocs()
+    void refreshDocs().catch(() => undefined)
   }, [refreshDocs])
+
+  useEffect(() => () => {
+    abortControllerRef.current?.abort()
+    uploadAbortRef.current?.abort()
+  }, [])
 
   useEffect(() => {
     // 系统配置概览（模型 / 分词），失败静默
@@ -141,23 +162,35 @@ export default function App() {
   // 会话持久化：每次变化都保存（带配额保护与 LRU 淘汰）
   useEffect(() => {
     try {
-      const saved = saveSessions(sessions, undefined, activeId)
+      const saved = saveSessions(sessions, storage, activeId)
       if (saved.length !== sessions.length) {
         setSessions(saved)
       }
     } catch {
       // 存储不可用时静默降级（隐私模式等）
     }
-  }, [sessions, activeId])
+  }, [sessions, storage, activeId])
 
   useEffect(() => {
     try {
-      if (activeId) localStorage.setItem(ACTIVE_KEY, activeId)
-      else localStorage.removeItem(ACTIVE_KEY)
+      if (activeId) storage.setItem(ACTIVE_KEY, activeId)
+      else storage.removeItem(ACTIVE_KEY)
     } catch {
       // 忽略
     }
-  }, [activeId])
+  }, [activeId, storage])
+
+  async function handleLogout() {
+    setLeaving(true)
+    setLogoutError('')
+    try {
+      await logout()
+    } catch (err) {
+      setLogoutError(err instanceof Error ? err.message : '退出失败，请重试')
+    } finally {
+      setLeaving(false)
+    }
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -263,6 +296,7 @@ export default function App() {
 
     try {
       await streamChat(
+        account.id,
         query,
         history,
         {
@@ -369,23 +403,31 @@ export default function App() {
   async function handleUpload(e: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
     if (files.length === 0 || uploading) return
+    const controller = new AbortController()
+    uploadAbortRef.current = controller
     setUploading(true)
+    setUploadError('')
     const errors: string[] = []
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
         setUploadProgress(`正在上传第 ${i + 1}/${files.length} 篇…`)
         try {
-          await uploadDoc(file)
+          await uploadDoc(account.id, file, controller.signal)
         } catch (err) {
+          if (controller.signal.aborted) return
           errors.push(`${file.name}: ${err instanceof Error ? err.message : '上传失败'}`)
         }
+        if (controller.signal.aborted) return
       }
-      await refreshDocs()
-      if (errors.length > 0) {
-        alert(`部分文档上传失败：\n${errors.join('\n')}`)
+      await refreshDocs().catch(() => {
+        errors.push('无法刷新文档列表')
+      })
+      if (!controller.signal.aborted && errors.length > 0) {
+        setUploadError(errors.join('\n'))
       }
     } finally {
+      uploadAbortRef.current = null
       setUploading(false)
       setUploadProgress(null)
       e.target.value = ''
@@ -397,7 +439,7 @@ export default function App() {
       return
     }
     try {
-      await deleteDoc(docId)
+      await deleteDoc(account.id, docId)
       await refreshDocs()
     } catch (err) {
       alert(err instanceof Error ? err.message : '删除失败')
@@ -407,7 +449,7 @@ export default function App() {
   async function handleViewChunks(doc: DocInfo) {
     setChunkLoading(true)
     try {
-      const chunks = await fetchDocChunks(doc.doc_id)
+      const chunks = await fetchDocChunks(account.id, doc.doc_id)
       setChunkView({ docName: doc.name, chunks })
     } catch {
       setChunkView({ docName: doc.name, chunks: [] })
@@ -432,6 +474,13 @@ export default function App() {
       <aside className={`sidebar ${menuOpen ? 'sidebar-open' : ''}`}>
         <h1 className="logo">📚 DocWise</h1>
         <p className="subtitle">智能知识库问答与 Agent 助手</p>
+        <div className="account-bar">
+          <span title={account.username}>{account.username}</span>
+          <button type="button" className="nav-btn" onClick={handleLogout} disabled={leaving}>
+            {leaving ? '正在退出…' : '退出登录'}
+          </button>
+        </div>
+        {logoutError && <p className="auth-error" role="alert">{logoutError}</p>}
 
         <nav className="nav">
           <button
@@ -661,6 +710,7 @@ export default function App() {
             <span>📄 文档 {stats.documents}</span>
             <span>🧩 分块 {stats.chunks}</span>
           </div>
+          {uploadError && <p className="auth-error upload-error" role="alert">{uploadError}</p>}
           <div className="docs-table">
             <div className="docs-row docs-head">
               <span>文档标题</span>

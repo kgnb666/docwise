@@ -1,11 +1,10 @@
 """知识库导入工具：把本地文件/目录批量分块向量化入库。
 
 用法（backend 目录）：
-    python scripts/import_kb.py ../my-notes              # 目录（递归 md/txt/pdf）
-    python scripts/import_kb.py a.pdf b.md c.txt         # 多个文件
-    python scripts/import_kb.py --embedding hash dir     # 无 Key 也能体验全流程
+    python scripts/import_kb.py --account alice ../my-notes
+    python scripts/import_kb.py --account alice --embedding hash a.pdf b.md c.txt
 
-流程：读取文本 → 分块 → 向量化 → 写入全局向量库 → 注册文档。
+流程：读取文本 → 分块 → 向量化 → 保存快照 → 写入全局向量库并注册文档。
 （重复导入会再次入库；删除请用 API：DELETE /api/documents/{doc_id}）
 """
 
@@ -14,6 +13,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import sys
+from io import TextIOWrapper
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -22,8 +22,11 @@ from app.core.docx_utils import extract_docx_text
 from app.core.pdf_utils import extract_pdf_text
 from app.deps import get_embedder
 from app.rag.chunker import make_chunks, new_doc_id
-from app.storage.document_store import get_document_store
-from app.storage.vector_store import get_vector_store
+from app.storage.accounts import find_account
+from app.storage.document_store import DocumentStore, get_document_store
+from app.storage.persistence import persist_and_index_document
+from app.storage.vector_store import InMemoryVectorStore, get_vector_store
+from app.storage.workspace import account_documents_dir
 
 SUPPORTED = {".md", ".markdown", ".txt", ".pdf", ".docx"}
 
@@ -60,6 +63,8 @@ async def import_kb(
     embedder=None,
     chunk_size: int = 800,
     overlap: int = 100,
+    *,
+    directory: Path | None = None,
 ) -> dict:
     """批量导入：返回 {"documents", "chunks", "items"}。"""
     embedder = embedder or get_embedder()
@@ -67,10 +72,8 @@ async def import_kb(
     if not files:
         raise SystemExit(f"未找到支持的文档（{', '.join(sorted(SUPPORTED))}）")
 
-    store = get_vector_store()
-    doc_store = get_document_store()
-    from app.storage.persistence import save_document
-
+    store = get_vector_store() if directory is None else InMemoryVectorStore()
+    doc_store = get_document_store() if directory is None else DocumentStore()
     total_chunks = 0
     imported = []
     for f in files:
@@ -81,29 +84,10 @@ async def import_kb(
         doc_id = new_doc_id()
         chunks = make_chunks(text, doc_id=doc_id, doc_name=f.name, chunk_size=chunk_size, overlap=overlap)
         vectors = await embedder.embed([c.text for c in chunks])
-        chunk_payloads = []
-        for c, v in zip(chunks, vectors):
-            store.add(
-                c.id,
-                v,
-                {
-                    "doc_id": doc_id,
-                    "doc_name": f.name,
-                    "index": c.index,
-                    "text": c.text,
-                    **c.metadata,
-                },
-            )
-            chunk_payloads.append(
-                {
-                    "index": c.index,
-                    "text": c.text,
-                    "vector": v,
-                    "metadata": c.metadata,
-                }
-            )
-        doc = doc_store.create(doc_id=doc_id, name=f.name, chunk_count=len(chunks))
-        save_document(doc_id, f.name, chunk_payloads, created_at=doc.get("created_at"))  # 持久化：重启自动恢复
+        persist_and_index_document(
+            store, doc_store, doc_id=doc_id, name=f.name, chunks=chunks, vectors=vectors,
+            directory=directory,
+        )
         total_chunks += len(chunks)
         imported.append({"name": f.name, "chunks": len(chunks)})
         print(f"  ✅ {f.name}: {len(chunks)} 块")
@@ -113,10 +97,14 @@ async def import_kb(
 def main() -> None:
     parser = argparse.ArgumentParser(description="DocWise 知识库导入")
     parser.add_argument("paths", nargs="+", help="文件或目录（递归）")
+    parser.add_argument("--account", required=True, help="目标知识库所属账号")
     parser.add_argument("--embedding", choices=["auto", "hash", "openai"], default="auto")
     parser.add_argument("--chunk-size", type=int, default=800)
     parser.add_argument("--overlap", type=int, default=100)
     args = parser.parse_args()
+    account = find_account(args.account)
+    if account is None:
+        parser.error("账号不存在，请先使用 manage_accounts.py add 创建账号")
 
     if args.embedding == "hash":
         from app.rag.embedder_hash import HashEmbedder
@@ -125,9 +113,13 @@ def main() -> None:
     else:
         embedder = get_embedder()
 
-    result = asyncio.run(import_kb(args.paths, embedder, args.chunk_size, args.overlap))
+    result = asyncio.run(import_kb(
+        args.paths, embedder, args.chunk_size, args.overlap, directory=account_documents_dir(account.id)
+    ))
     print(f"\n导入完成：{result['documents']} 篇文档 / {result['chunks']} 个分块")
 
 
 if __name__ == "__main__":
+    if isinstance(sys.stdout, TextIOWrapper):
+        sys.stdout.reconfigure(errors="backslashreplace")
     main()

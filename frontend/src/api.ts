@@ -2,6 +2,54 @@
 
 import type { ChatMessage, Citation, DocInfo, Stats } from './types'
 
+export interface Account {
+  id: string
+  username: string
+}
+
+export const SESSION_ENDED = 'docwise:session-ended'
+
+async function workspaceFetch(accountId: string, url: string, init?: RequestInit): Promise<Response> {
+  const headers = new Headers(init?.headers)
+  headers.set('X-DocWise-Account', accountId)
+  const response = await fetch(url, { ...init, headers, cache: 'no-store' })
+  if (response.status === 401 && typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(SESSION_ENDED, { detail: accountId }))
+  }
+  return response
+}
+
+async function responseError(response: Response, fallback: string): Promise<Error> {
+  const data = await response.json().catch(() => null)
+  return new Error(typeof data?.detail === 'string' ? data.detail : fallback)
+}
+
+export async function fetchAccount(signal?: AbortSignal): Promise<Account | null> {
+  const response = await fetch('/api/auth/me', { cache: 'no-store', signal })
+  if (response.status === 401) return null
+  if (!response.ok) throw await responseError(response, '无法读取登录状态，请重试')
+  return response.json()
+}
+
+export async function loginAccount(username: string, password: string): Promise<Account> {
+  const response = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+    cache: 'no-store',
+  })
+  if (!response.ok) throw await responseError(response, '登录失败，请检查账号和密码')
+  return response.json()
+}
+
+export async function logoutAccount(accountId: string): Promise<boolean> {
+  const response = await workspaceFetch(accountId, '/api/auth/logout', { method: 'POST' })
+  if (!response.ok && response.status !== 401) {
+    throw await responseError(response, '退出失败，请重试')
+  }
+  return response.ok
+}
+
 export interface StreamHandlers {
   onCitations?: (citations: Citation[]) => void
   onDelta?: (content: string) => void
@@ -13,6 +61,7 @@ export interface StreamHandlers {
 
 /** 流式问答：解析后端 SSE 事件（citations / delta / done / error） */
 export async function streamChat(
+  accountId: string,
   query: string,
   history: ChatMessage[],
   handlers: StreamHandlers,
@@ -20,7 +69,7 @@ export async function streamChat(
 ): Promise<void> {
   let resp: Response
   try {
-    resp = await fetch('/api/chat/stream', {
+    resp = await workspaceFetch(accountId, '/api/chat/stream', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -105,19 +154,20 @@ export async function streamChat(
   }
 }
 
-export async function fetchDocs(): Promise<DocInfo[]> {
-  const resp = await fetch('/api/documents')
+export async function fetchDocs(accountId: string): Promise<DocInfo[]> {
+  const resp = await workspaceFetch(accountId, '/api/documents')
+  if (!resp.ok) throw await responseError(resp, '无法读取文档')
   const data = await resp.json()
   return data.documents ?? []
 }
 
-export async function fetchStats(): Promise<Stats> {
-  const resp = await fetch('/api/documents/stats')
+export async function fetchStats(accountId: string): Promise<Stats> {
+  const resp = await workspaceFetch(accountId, '/api/documents/stats')
+  if (!resp.ok) throw await responseError(resp, '无法读取文档统计')
   return resp.json()
 }
 
 export interface SystemInfo {
-  stats: { documents: number; chunks: number }
   config: {
     llm_model: string
     embedding_provider: string
@@ -133,23 +183,17 @@ export async function fetchSystemInfo(): Promise<SystemInfo> {
   return resp.json()
 }
 
-export async function uploadDoc(file: File): Promise<DocInfo> {
+export async function uploadDoc(accountId: string, file: File, signal?: AbortSignal): Promise<DocInfo> {
   const form = new FormData()
   form.append('file', file)
-  const resp = await fetch('/api/documents', { method: 'POST', body: form })
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => null)
-    throw new Error(err?.detail ?? `上传失败：HTTP ${resp.status}`)
-  }
+  const resp = await workspaceFetch(accountId, '/api/documents', { method: 'POST', body: form, signal })
+  if (!resp.ok) throw await responseError(resp, `上传失败：HTTP ${resp.status}`)
   return resp.json()
 }
 
-export async function deleteDoc(docId: string): Promise<void> {
-  const resp = await fetch(`/api/documents/${docId}`, { method: 'DELETE' })
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => null)
-    throw new Error(err?.detail ?? `删除失败：HTTP ${resp.status}`)
-  }
+export async function deleteDoc(accountId: string, docId: string): Promise<void> {
+  const resp = await workspaceFetch(accountId, `/api/documents/${docId}`, { method: 'DELETE' })
+  if (!resp.ok) throw await responseError(resp, `删除失败：HTTP ${resp.status}`)
 }
 
 export interface DocChunk {
@@ -160,8 +204,8 @@ export interface DocChunk {
 }
 
 /** 查看某文档被切成哪些块（演示"知识如何被切分"）。 */
-export async function fetchDocChunks(docId: string): Promise<DocChunk[]> {
-  const resp = await fetch(`/api/documents/${docId}/chunks`)
+export async function fetchDocChunks(accountId: string, docId: string): Promise<DocChunk[]> {
+  const resp = await workspaceFetch(accountId, `/api/documents/${docId}/chunks`)
   if (!resp.ok) return []
   const data = await resp.json()
   return data.chunks ?? []

@@ -1,7 +1,6 @@
 # 部署上线指南（给零基础）
 
-> 目标：让项目有一个**可访问的地址**（面试官点开就能玩）。
-> 先本地部署（0 成本）→ 以后想上公网再买服务器（¥30-60/月）。
+先在本机验证文档上传和问答，再按需部署到可通过 HTTPS 访问的服务器。
 
 ## 方案 A：本地部署（无 Docker、不花钱，推荐先做这个）
 
@@ -11,8 +10,9 @@
 # 1) 构建前端（输出到 frontend/dist）
 cd frontend && npm run build
 
-# 2) 终端 1：启动后端（backend 目录）
-cd backend && .\.venv\Scripts\uvicorn app.main:app --host 0.0.0.0 --port 8000
+# 2) 终端 1：在 backend 目录创建账号并启动后端
+.\.venv\Scripts\python scripts/manage_accounts.py add alice
+.\.venv\Scripts\uvicorn app.main:app --host 127.0.0.1 --port 8000
 
 # 3) 终端 2：启动前端生产预览（/api 自动代理到 8000）
 cd frontend && npm run preview -- --port 4173
@@ -20,9 +20,8 @@ cd frontend && npm run preview -- --port 4173
 # 浏览器打开 http://localhost:4173
 ```
 
-- 同局域网演示：把前端 `npm run preview -- --host`，后端已 `--host 0.0.0.0`，
-  同事用 `http://你本机IP:4173` 访问（代理指向本机 8000，天然可用）。
-- 验证：`http://localhost:4173/api/health` 返回 JSON 即部署成功。
+- 在 `http://localhost:4173` 登录刚创建的账号，确认能上传文件并在文档列表查看分块。
+- 局域网多人访问时，请通过 HTTPS 反向代理提供前端入口。
 
 ## 方案 B：云服务器上线（推荐投递前再做）
 
@@ -62,11 +61,26 @@ nano .env    # 填入 OPENAI_API_KEY（DeepSeek/通义都行，改 base_url 和 
 cd ~/docwise
 docker compose up --build -d
 docker compose ps          # 两个容器都 running 即成功
+docker compose exec backend python scripts/manage_accounts.py add alice
 ```
 
-浏览器访问 `http://<服务器公网IP>` —— 应该能看到 DocWise 界面。
+`/api/health` 可用于检查服务存活。浏览器登录请使用下节配置的 HTTPS 域名，
+并保持 `AUTH_COOKIE_SECURE=true`。账号由运维通过上面的命令创建，密码在终端交互输入。
 
-## 4. 配置 HTTPS（强烈建议，面试官更信任 https）
+升级前备份 `backend/data`。旧版 `data/documents` 里的快照没有归属信息。
+确认整批文档属于同一账号后，在后端停止期间执行一次性归属迁移：
+
+```bash
+docker compose stop backend
+docker compose run --rm --no-deps backend python scripts/manage_accounts.py adopt-legacy alice
+docker compose up -d backend
+```
+
+命令保留源快照。中断后可用原账号继续，完成后重跑会跳过已完成的迁移。
+如旧文档分别属于不同人，可让各账号重新上传自己的原文档。新增批量导入使用
+`python scripts/import_kb.py --account alice <目录>`，导入后重启正在运行的后端。
+
+## 4. 配置 HTTPS
 
 用 Caddy 比 Nginx+certbot 简单得多。在服务器上：
 
@@ -81,8 +95,7 @@ sudo systemctl reload caddy
 
 把域名解析到服务器 IP，Caddy 自动签发 Let's Encrypt 证书。
 
-> 没有域名？先裸 IP 跑着演示也行，简历里写"部署于 xxx.xx.xx.xx"，
-> 正式投递前再补域名。
+本机非 HTTPS 开发环境可在后端配置 `AUTH_COOKIE_SECURE=false`，公网保持 HTTPS。
 
 ## 5. 常见问题排查
 

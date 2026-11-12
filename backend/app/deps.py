@@ -6,11 +6,12 @@ get_pipeline 通过 Depends 接收嵌入器，保证 DI 覆盖（如测试注入
 
 from __future__ import annotations
 
-from typing import Protocol
+from typing import Annotated, Protocol
 
 import httpx
-from fastapi import Depends
+from fastapi import Depends, Request
 
+from app.api.routes.auth import require_account
 from app.config import get_settings
 from app.core.cache import Cache, InMemoryTTLCache
 from app.core.rate_limit import RateLimiter
@@ -19,7 +20,9 @@ from app.rag.embedder_hash import HashEmbedder
 from app.rag.pipeline import RagPipeline
 from app.rag.reranker import APIReranker, NullReranker, OverlapReranker
 from app.rag.retriever import Retriever
-from app.storage.vector_store import get_vector_store
+from app.storage.accounts import Account
+from app.storage.vector_store import VectorStore, get_vector_store
+from app.storage.workspace import Workspace
 
 _settings = get_settings()
 
@@ -80,9 +83,9 @@ def get_reranker():
     return NullReranker()
 
 
-def get_retriever() -> Retriever:
+def get_retriever(vector_store: VectorStore | None = None) -> Retriever:
     return Retriever(
-        vector_store=get_vector_store(),
+        vector_store=vector_store if vector_store is not None else get_vector_store(),
         top_k=_settings.top_k,
         rerank_top_k=_settings.rerank_top_k,
         alpha=_settings.hybrid_alpha,
@@ -124,11 +127,18 @@ def get_rate_limiter() -> RateLimiter:
     return _rate_limiter
 
 
-def get_pipeline(embedder: EmbedderLike = Depends(get_embedder)) -> RagPipeline:
+def get_workspace(request: Request, account: Account = Depends(require_account)) -> Workspace:
+    return request.app.state.workspaces.for_account(account.id)
+
+
+def get_pipeline(
+    embedder: EmbedderLike = Depends(get_embedder),
+    workspace: Annotated[Workspace | None, Depends(get_workspace)] = None,
+) -> RagPipeline:
     return RagPipeline(
         embedder=embedder,
-        retriever=get_retriever(),
+        retriever=get_retriever(workspace.vectors if workspace is not None else None),
         settings=_settings,
-        retrieval_cache=get_cache(),
+        retrieval_cache=workspace.cache if workspace is not None else get_cache(),
         http_client=get_http_client(),
     )

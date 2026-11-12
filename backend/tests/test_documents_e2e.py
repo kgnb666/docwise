@@ -16,6 +16,8 @@ from app.rag.retriever import Retriever
 from app.storage.document_store import reset_document_store
 from app.storage.vector_store import get_vector_store, reset_vector_store
 
+pytestmark = pytest.mark.usefixtures("isolated_api_workspace")
+
 SAMPLES = Path(__file__).resolve().parents[1] / "samples"
 RAG_NOTES = (SAMPLES / "rag-notes.md").read_text(encoding="utf-8")
 DOCKER_NOTES = (SAMPLES / "docker-notes.md").read_text(encoding="utf-8")

@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
+from app.api.routes.auth import require_account
 from app.config import get_settings
 from app.core.observability import log_event, new_query_id, truncate
 from app.core.rate_limit import RateLimiter
@@ -21,7 +22,7 @@ from app.core.utils import estimate_tokens
 from app.deps import get_pipeline, get_rate_limiter
 from app.rag.pipeline import RagPipeline
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_account)])
 
 _settings = get_settings()
 
@@ -139,4 +140,4 @@ async def chat_stream(req: ChatRequest, pipeline: RagPipeline = Depends(get_pipe
         finally:
             yield "data: [DONE]\n\n"
 
-    return StreamingResponse(gen(), media_type="text/event-stream")
+    return StreamingResponse(gen(), media_type="text/event-stream", headers={"Cache-Control": "no-store"})

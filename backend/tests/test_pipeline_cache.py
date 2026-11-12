@@ -55,6 +55,32 @@ def test_retrieve_without_cache_calls_every_time():
     assert p.embedder.calls == 2
 
 
+def test_pending_retrieval_cannot_recache_deleted_chunks():
+    async def check():
+        pipeline = _make_pipeline(with_cache=True)
+        rerank_started = asyncio.Event()
+        finish_rerank = asyncio.Event()
+
+        class PausedReranker:
+            async def rerank(self, query, candidates):
+                rerank_started.set()
+                await finish_rerank.wait()
+                return candidates
+
+        pipeline.retriever.reranker = PausedReranker()
+        pending = asyncio.create_task(pipeline._retrieve("苹果"))
+        await asyncio.wait_for(rerank_started.wait(), timeout=2)
+
+        assert pipeline.retriever.store.delete_by_doc("d1") == 1
+        pipeline.retrieval_cache.clear()
+        finish_rerank.set()
+        await pending
+
+        assert await pipeline._retrieve("苹果") == []
+
+    asyncio.run(check())
+
+
 def test_query_rewrite_event_emitted_first():
     p = _make_pipeline(with_cache=True, rewrite=True)
     events: list[dict] = []

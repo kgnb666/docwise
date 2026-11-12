@@ -13,12 +13,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import chat, documents, health
+from app.api.routes import auth, chat, documents, health
 from app.config import get_settings
-from app.core.observability import log_event, setup_logging
-from app.storage.document_store import get_document_store
-from app.storage.persistence import restore_to_stores
-from app.storage.vector_store import get_vector_store
+from app.core.observability import setup_logging
+from app.storage.workspace import WorkspaceRegistry
 
 settings = get_settings()
 setup_logging()  # 结构化日志：控制台 + logs/app.log
@@ -26,10 +24,7 @@ setup_logging()  # 结构化日志：控制台 + logs/app.log
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    """启动：把磁盘上的文档快照恢复到内存存储（幂等，零 API 调用）。"""
-    restored = restore_to_stores(get_vector_store(), get_document_store())
-    if restored:
-        log_event("restore", documents=restored)
+    """账号首次访问时恢复对应的文档快照。"""
     yield
     from app.deps import close_http_client
 
@@ -43,6 +38,7 @@ def create_app() -> FastAPI:
         version=settings.app_version,
         lifespan=lifespan,
     )
+    app.state.workspaces = WorkspaceRegistry()
 
     # CORS：允许前端 dev server 跨域访问
     app.add_middleware(
@@ -55,6 +51,7 @@ def create_app() -> FastAPI:
 
     # 注册路由
     app.include_router(health.router, prefix="/api")
+    app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
     app.include_router(documents.router, prefix="/api/documents", tags=["documents"])
     app.include_router(chat.router, prefix="/api", tags=["chat"])
 

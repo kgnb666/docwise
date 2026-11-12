@@ -23,6 +23,94 @@ body {
   color: var(--text);
 }
 
+.auth-shell {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.auth-card {
+  width: min(100%, 380px);
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.auth-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.auth-card p {
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.auth-card > p {
+  margin-top: 16px;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+
+.auth-form input:focus-visible,
+.auth-form button:focus-visible,
+.account-bar button:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+.auth-form button:disabled,
+.account-bar button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.auth-card .auth-error,
+.auth-error {
+  color: var(--danger);
+  font-size: 14px;
+}
+
+.upload-error {
+  white-space: pre-line;
+}
+
+.account-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.account-bar span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.account-bar .nav-btn {
+  flex: none;
+  padding: 6px 9px;
+}
+
 .layout {
   display: flex;
   height: 100vh;

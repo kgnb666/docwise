@@ -123,6 +123,7 @@ def test_eval_log_has_query_id_and_metrics(captured):
     assert "latency_ms" in fields
 
 
+@pytest.mark.usefixtures("isolated_api_workspace")
 def test_chat_error_log_has_query_id_without_key(captured):
     from app.deps import get_pipeline
     from app.main import app

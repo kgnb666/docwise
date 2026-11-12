@@ -106,22 +106,16 @@ class RagPipeline:
         便于把一次问答的检索阶段与整体链路串起来排查。
         """
         t0 = time.perf_counter()
-        cache_hit = False
-        if self.retrieval_cache is not None:
-            hit = self.retrieval_cache.get(query)
-            if hit is not None:
-                cache_hit = True
-                chunks = hit
-            else:
-                chunks = None
-        else:
-            chunks = None
-
+        cache = self.retrieval_cache
+        chunks = cache.get(query) if cache is not None else None
+        cache_hit = chunks is not None
         if chunks is None:
             vectors = await self.embedder.embed([query])
+            revision = self.retriever.store.revision
             chunks = await self.retriever.retrieve(query, vectors[0])
-            if self.retrieval_cache is not None and chunks:
-                self.retrieval_cache.set(query, chunks)
+            # 异步精排期间，文档增删可能已清空缓存，旧结果不能重新写回。
+            if cache is not None and chunks and revision == self.retriever.store.revision:
+                cache.set(query, chunks)
 
         log_event(
             "retrieval",

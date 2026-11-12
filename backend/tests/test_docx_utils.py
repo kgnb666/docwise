@@ -13,6 +13,8 @@ from app.rag.embedder_hash import HashEmbedder
 from app.storage.document_store import reset_document_store
 from app.storage.vector_store import reset_vector_store
 
+pytestmark = pytest.mark.usefixtures("isolated_api_workspace")
+
 
 def make_docx_bytes() -> bytes:
     """用 python-docx 生成一个含标题/段落/表格的测试 docx。"""

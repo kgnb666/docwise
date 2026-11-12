@@ -1,10 +1,13 @@
 """聊天接口限流测试（429）。"""
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.core.rate_limit import RateLimiter
 from app.deps import get_rate_limiter
 from app.main import app
+
+pytestmark = pytest.mark.usefixtures("isolated_api_workspace")
 
 
 def test_chat_rate_limit_returns_429():

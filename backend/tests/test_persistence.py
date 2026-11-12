@@ -1,6 +1,8 @@
 """持久化测试：快照回环 / 重启恢复 / 上传落盘与删除。"""
 
 import asyncio
+import os
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -17,16 +19,16 @@ from app.storage.persistence import (
 )
 from app.storage.vector_store import get_vector_store, reset_vector_store
 
+pytestmark = pytest.mark.usefixtures("isolated_api_workspace")
+
 SAMPLE = "这是一篇测试文档。DocWise-X 协议端口是 9801，超时 300ms。"
 
 
 @pytest.fixture(autouse=True)
-def _isolated():
+def _isolated(monkeypatch, tmp_path):
     reset_vector_store()
     reset_document_store()
-    # 清空持久化快照目录：其他测试留下的快照会污染本文件断言
-    for f in documents_dir().glob("*.json"):
-        f.unlink()
+    monkeypatch.setattr("app.storage.persistence.data_dir", lambda: tmp_path)
     app.dependency_overrides[get_embedder] = lambda: HashEmbedder()
     yield
     app.dependency_overrides.pop(get_embedder, None)
@@ -47,6 +49,21 @@ def test_save_and_load_roundtrip():
     assert delete_document_file("doc1") is True
     assert delete_document_file("doc1") is False
     assert load_all_documents() == []
+
+
+def test_failed_snapshot_replace_preserves_previous_snapshot(monkeypatch):
+    chunks = [{"index": 0, "text": SAMPLE, "vector": [0.1, 0.2, 0.3]}]
+    path = save_document("doc1", "原始文档.md", chunks)
+
+    def fail_replace(*args):
+        raise OSError("simulated replace failure")
+
+    monkeypatch.setattr(os, "replace", fail_replace)
+    with pytest.raises(OSError, match="simulated replace failure"):
+        save_document("doc1", "修改后的文档.md", chunks)
+
+    assert [doc["name"] for doc in load_all_documents()] == ["原始文档.md"]
+    assert list(documents_dir().iterdir()) == [path]
 
 
 def test_restore_to_stores():
@@ -87,6 +104,53 @@ def test_upload_persists_to_disk():
     assert load_all_documents() == []
 
 
+def test_upload_failure_keeps_document_out_of_index_and_allows_retry(tmp_path):
+    client = TestClient(app, raise_server_exceptions=False)
+    files = {"file": ("测试文档.md", SAMPLE.encode("utf-8"), "text/markdown")}
+    blocked_directory = tmp_path / "documents"
+    blocked_directory.touch()
+
+    failed = client.post("/api/documents", files=files)
+
+    assert failed.status_code == 500
+    assert client.get("/api/documents").json() == {"documents": []}
+    assert client.get("/api/documents/stats").json() == {"documents": 0, "chunks": 0}
+
+    blocked_directory.unlink()
+    retry = client.post("/api/documents", files=files)
+    assert retry.status_code == 200
+    assert client.get("/api/documents/stats").json() == {"documents": 1, "chunks": 1}
+    assert [doc["doc_id"] for doc in load_all_documents()] == [retry.json()["doc_id"]]
+
+
+def test_delete_failure_keeps_document_available_until_successful_retry(monkeypatch):
+    from app.storage.persistence import restore_to_stores
+
+    client = TestClient(app, raise_server_exceptions=False)
+    upload = client.post(
+        "/api/documents", files={"file": ("测试文档.md", SAMPLE.encode("utf-8"), "text/markdown")}
+    )
+    assert upload.status_code == 200
+    doc_id = upload.json()["doc_id"]
+    url = f"/api/documents/{doc_id}"
+
+    def fail_unlink(*args, **kwargs):
+        raise PermissionError("simulated unlink failure")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "unlink", fail_unlink)
+        failed = client.delete(url)
+
+    assert failed.status_code == 500
+    assert client.get("/api/documents/stats").json() == {"documents": 1, "chunks": 1}
+    assert client.get(f"{url}/chunks").status_code == 200
+    assert [doc["doc_id"] for doc in load_all_documents()] == [doc_id]
+
+    assert client.delete(url).status_code == 200
+    assert client.get("/api/documents/stats").json() == {"documents": 0, "chunks": 0}
+    assert restore_to_stores(get_vector_store(), get_document_store()) == 0
+
+
 def test_import_kb_persists():
     """import_kb 导入的文档同样落盘。"""
     from pathlib import Path
@@ -101,6 +165,20 @@ def test_import_kb_persists():
     docs = load_all_documents()
     assert len(docs) == 1
     assert docs[0]["name"] == "rag-notes.md"
+
+
+def test_import_failure_keeps_document_out_of_index(tmp_path):
+    from scripts.import_kb import import_kb
+
+    sample = tmp_path / "notes.md"
+    sample.write_text(SAMPLE, encoding="utf-8")
+    (tmp_path / "documents").touch()
+
+    with pytest.raises(FileExistsError):
+        asyncio.run(import_kb([str(sample)], HashEmbedder()))
+
+    assert get_document_store().count() == 0
+    assert get_vector_store().count() == 0
 
 
 def test_restore_preserves_heading_metadata():

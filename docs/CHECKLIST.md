@@ -16,7 +16,7 @@
 
 - [ ] 确定知识库领域（如：课程笔记 / 算法面试题 / 技术文档）
 - [ ] 收集资料（md/txt/pdf），放到一个文件夹
-- [ ] 导入：`cd backend && python scripts/import_kb.py <文件夹>`
+- [ ] 导入：`cd backend && python scripts/import_kb.py --account <账号> <文件夹>`
 - [ ] 扩充测试集：`tests/data/test_set.json` 追加问题（每个问题标注期望来源文档）
 - [ ] 重跑评测：`python scripts/run_eval.py --embedding openai --tokenizer jieba --reranker-api --top-k 1`
 - [ ] 把真实数据更新到 `docs/EVAL.md` / `docs/RESUME.md`

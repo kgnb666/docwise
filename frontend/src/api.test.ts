@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { streamChat } from './api'
+import { fetchDocs, streamChat } from './api'
 
 function sseResponse(events: string[]): Response {
   const body = events.map((e) => `data: ${e}\n\n`).join('')
@@ -15,6 +15,20 @@ function sseResponse(events: string[]): Response {
 
 afterEach(() => {
   vi.unstubAllGlobals()
+})
+
+it('文档请求绑定当前账号并避免复用浏览器缓存', async () => {
+  const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) =>
+    new Response(JSON.stringify({ documents: [] })),
+  )
+  vi.stubGlobal('fetch', fetchMock)
+
+  expect(await fetchDocs('alice-id')).toEqual([])
+
+  const [url, options] = fetchMock.mock.calls[0]
+  expect(url).toBe('/api/documents')
+  expect(new Headers(options?.headers).get('X-DocWise-Account')).toBe('alice-id')
+  expect(options?.cache).toBe('no-store')
 })
 
 describe('streamChat', () => {
@@ -41,7 +55,7 @@ describe('streamChat', () => {
     let citations: unknown = null
     let doneCount = 0
 
-    await streamChat('问题', [], {
+    await streamChat('account-id', '问题', [], {
       onCitations: (c) => {
         citations = c
       },
@@ -66,7 +80,7 @@ describe('streamChat', () => {
   it('HTTP 非 200 时走 onError 回调', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('oops', { status: 500 })))
     const errors: string[] = []
-    await streamChat('问题', [], { onError: (m) => errors.push(m) })
+    await streamChat('account-id', '问题', [], { onError: (m) => errors.push(m) })
     expect(errors).toEqual(['请求失败：HTTP 500'])
   })
 
@@ -82,7 +96,7 @@ describe('streamChat', () => {
       ),
     )
     const errors: string[] = []
-    await streamChat('问题', [], { onError: (m) => errors.push(m) })
+    await streamChat('account-id', '问题', [], { onError: (m) => errors.push(m) })
     expect(errors).toEqual(['请求过于频繁，请稍后再试'])
   })
 
@@ -101,6 +115,7 @@ describe('streamChat', () => {
     const errors: string[] = []
     let doneCalled = false
     await streamChat(
+      'account-id',
       '问题',
       [],
       {
@@ -140,6 +155,7 @@ describe('streamChat', () => {
     let doneCalled = false
 
     await streamChat(
+      'account-id',
       '问题',
       [],
       {

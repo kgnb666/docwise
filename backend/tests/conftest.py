@@ -30,3 +30,22 @@ def _legacy_tokenizer():
     utils.set_tokenizer_mode("legacy")
     yield
     utils.set_tokenizer_mode("legacy")
+
+
+@pytest.fixture
+def isolated_api_workspace(monkeypatch):
+    """给已有流程测试注入独立工作区。账号校验由端到端权限测试覆盖。"""
+    from app.api.routes.auth import require_account
+    from app.deps import get_cache, get_workspace
+    from app.main import app
+    from app.storage.accounts import Account
+    from app.storage.document_store import get_document_store
+    from app.storage.vector_store import get_vector_store
+    from app.storage.workspace import Workspace
+
+    monkeypatch.setitem(app.dependency_overrides, require_account, lambda: Account("test", "test"))
+    monkeypatch.setitem(
+        app.dependency_overrides,
+        get_workspace,
+        lambda: Workspace(get_document_store(), get_vector_store(), get_cache(), None),
+    )

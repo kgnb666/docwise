@@ -13,6 +13,18 @@ export const SESSIONS_KEY = 'docwise.sessions.v1'
 export const ACTIVE_KEY = 'docwise.activeSession.v1'
 const LEGACY_KEY = 'docwise.messages.v1'
 
+export function accountSessionStorage(
+  accountId: string,
+  storage?: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>,
+): Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> {
+  const scopedKey = (key: string) => `docwise.account.${accountId}.${key}`
+  return {
+    getItem: (key) => (storage ?? window.localStorage).getItem(scopedKey(key)),
+    setItem: (key, value) => (storage ?? window.localStorage).setItem(scopedKey(key), value),
+    removeItem: (key) => (storage ?? window.localStorage).removeItem(scopedKey(key)),
+  }
+}
+
 export function makeId(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { loadSessions, pruneSessions, saveSessions, sessionTitle } from './sessions'
+import { accountSessionStorage, loadSessions, pruneSessions, saveSessions, sessionTitle } from './sessions'
 import type { ChatMessage } from './types'
 
 function storage(data: Record<string, string>): Pick<Storage, 'getItem'> {
@@ -7,6 +7,22 @@ function storage(data: Record<string, string>): Pick<Storage, 'getItem'> {
     getItem: (key: string) => data[key] ?? null,
   }
 }
+
+it('不同账号的本地会话隔离，旧会话不会进入任何账号', () => {
+  const data = new Map([['docwise.messages.v1', '[{"role":"user","content":"旧会话"}]']])
+  const shared = {
+    getItem: (key: string) => data.get(key) ?? null,
+    setItem: (key: string, value: string) => { data.set(key, value) },
+    removeItem: (key: string) => { data.delete(key) },
+  }
+  const alice = accountSessionStorage('alice-id', shared)
+  const bob = accountSessionStorage('bob-id', shared)
+  saveSessions([{ id: 's1', title: '私有会话', messages: [], updatedAt: 1 }], alice)
+
+  expect(loadSessions(alice).activeId).toBe('s1')
+  expect(loadSessions(bob)).toEqual({ sessions: [], activeId: null })
+  expect(shared.getItem('docwise.messages.v1')).toContain('旧会话')
+})
 
 describe('sessionTitle', () => {
   it('取第一条用户消息作为标题，超 18 字截断', () => {

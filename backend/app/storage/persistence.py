@@ -12,11 +12,21 @@
 from __future__ import annotations
 
 import json
+import os
+import re
+import tempfile
 import threading
 import time
+from contextlib import suppress
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from app.config import get_settings
+
+if TYPE_CHECKING:
+    from app.rag.chunker import Chunk
+    from app.storage.document_store import DocumentStore
+    from app.storage.vector_store import VectorStore
 
 
 def data_dir() -> Path:
@@ -34,8 +44,10 @@ def documents_dir() -> Path:
 _lock = threading.Lock()
 
 
-def _doc_path(doc_id: str) -> Path:
-    return documents_dir() / f"{doc_id}.json"
+def _doc_path(doc_id: str, directory: Path | None = None) -> Path:
+    if not re.fullmatch(r"[A-Za-z0-9_-]+", doc_id):
+        raise ValueError("文档 ID 格式不正确")
+    return (directory if directory is not None else documents_dir()) / f"{doc_id}.json"
 
 
 def save_document(
@@ -43,6 +55,8 @@ def save_document(
     name: str,
     chunks: list[dict],
     created_at: str | None = None,
+    *,
+    directory: Path | None = None,
 ) -> Path:
     """保存文档快照。chunks 形如 [{"index": 0, "text": "...", "vector": [...]}]。"""
     payload = {
@@ -51,26 +65,68 @@ def save_document(
         "chunks": chunks,
         "created_at": created_at or time.strftime("%Y-%m-%d %H:%M:%S"),
     }
-    path = _doc_path(doc_id)
+    path = _doc_path(doc_id, directory)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    snapshot = json.dumps(payload, ensure_ascii=False)
     with _lock:
-        path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+        temp_path: Path | None = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                dir=path.parent,
+                prefix=".document-",
+                suffix=".tmp",
+                encoding="utf-8",
+                delete=False,
+            ) as temp:
+                temp_path = Path(temp.name)
+                temp.write(snapshot)
+                temp.flush()
+                os.fsync(temp.fileno())
+            temp_path.replace(path)
+        finally:
+            if temp_path is not None:
+                with suppress(OSError):
+                    temp_path.unlink(missing_ok=True)
     return path
 
 
-def delete_document_file(doc_id: str) -> bool:
+def persist_and_index_document(
+    store: VectorStore,
+    doc_store: DocumentStore,
+    *,
+    doc_id: str,
+    name: str,
+    chunks: list[Chunk],
+    vectors: list[list[float]],
+    directory: Path | None = None,
+) -> None:
+    """快照写入成功后，才将文档发布到内存索引。"""
+    chunk_payloads = [
+        {"index": chunk.index, "text": chunk.text, "vector": vector, "metadata": chunk.metadata}
+        for chunk, vector in zip(chunks, vectors, strict=True)
+    ]
+    created_at = time.strftime("%Y-%m-%d %H:%M:%S")
+    save_document(doc_id, name, chunk_payloads, created_at=created_at, directory=directory)
+    _index_document(store, doc_store, doc_id, name, chunk_payloads, created_at)
+
+
+def delete_document_file(doc_id: str, *, directory: Path | None = None) -> bool:
     """删除文档快照，返回是否存在。"""
-    path = _doc_path(doc_id)
+    path = _doc_path(doc_id, directory)
     with _lock:
-        if path.exists():
+        try:
             path.unlink()
-            return True
-        return False
+        except FileNotFoundError:
+            return False
+    return True
 
 
-def load_all_documents() -> list[dict]:
+def load_all_documents(*, directory: Path | None = None) -> list[dict]:
     """扫描数据目录，返回全部文档快照（doc_id/name/chunks）。"""
     out: list[dict] = []
-    for path in sorted(documents_dir().glob("*.json")):
+    directory = directory if directory is not None else documents_dir()
+    for path in sorted(directory.glob("*.json")):
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
             if payload.get("chunks"):
@@ -80,31 +136,44 @@ def load_all_documents() -> list[dict]:
     return out
 
 
-def restore_to_stores(store, doc_store) -> int:
+def _index_document(
+    store: VectorStore,
+    doc_store: DocumentStore,
+    doc_id: str,
+    name: str,
+    chunks: list[dict],
+    created_at: str | None,
+) -> None:
+    for chunk in chunks:
+        store.add(
+            f"{doc_id}:{chunk['index']}",
+            chunk["vector"],
+            {
+                "doc_id": doc_id,
+                "doc_name": name,
+                "index": chunk["index"],
+                "text": chunk["text"],
+                **chunk.get("metadata", {}),
+            },
+        )
+    doc_store.create(doc_id=doc_id, name=name, chunk_count=len(chunks), created_at=created_at)
+
+
+def restore_to_stores(
+    store: VectorStore, doc_store: DocumentStore, *, directory: Path | None = None
+) -> int:
     """把磁盘快照恢复进内存存储，返回恢复的文档数。
 
     幂等：chunk_id 由 doc_id:index 构成，重复加载不会冲突。
     """
-    restored = 0
-    for payload in load_all_documents():
-        doc_id = payload["doc_id"]
-        for chunk in payload["chunks"]:
-            store.add(
-                f"{doc_id}:{chunk['index']}",
-                chunk["vector"],
-                {
-                    "doc_id": doc_id,
-                    "doc_name": payload["name"],
-                    "index": chunk["index"],
-                    "text": chunk["text"],
-                    **chunk.get("metadata", {}),
-                },
-            )
-        doc_store.create(
-            doc_id=doc_id,
-            name=payload["name"],
-            chunk_count=len(payload["chunks"]),
-            created_at=payload.get("created_at"),
+    documents = load_all_documents(directory=directory)
+    for payload in documents:
+        _index_document(
+            store,
+            doc_store,
+            payload["doc_id"],
+            payload["name"],
+            payload["chunks"],
+            payload.get("created_at"),
         )
-        restored += 1
-    return restored
+    return len(documents)
